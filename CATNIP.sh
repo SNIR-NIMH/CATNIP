@@ -406,7 +406,7 @@ echo "Atlas image                   : $ATLASIMAGE"      2>&1 | tee -a  $LOG
 echo "Atlas label                   : $ATLASLABEL"      2>&1 | tee -a  $LOG
 echo "FRST threshold                : ${THRESHOLD} "    2>&1 | tee -a  $LOG
 echo "Atlas version                 : ${ATLASVERSION}"  2>&1 | tee -a  $LOG
-echo "Background noise init/slope   : ${BG_NOISE_INIT}/${BG_NOISE_SLOPE}" 2>&1 | tee -a  $LOG
+echo "Background noise init/slope   : ${BG_NOISE_INIT},${BG_NOISE_SLOPE}" 2>&1 | tee -a  $LOG
 if [ x"${EXCLUDE_MASK}" != "x" ];then
     echo "Exclusion mask                : ${EXCLUDE_MASK}"  2>&1 | tee -a  $LOG
 fi
@@ -442,16 +442,20 @@ ${INSTALL_PREFIX}/fix_header.sh $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii  $OUT
 ${INSTALL_PREFIX}/remove_background_noise.sh  $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii ${BG_NOISE_INIT} $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii ${BG_NOISE_SLOPE}  2>&1 | tee  -a $LOG
 echo "================= Running N4 bias field correction  ====================" 2>&1 | tee -a $LOG 
 # Run N4 in downsampled space for speed
-echo "N4BiasFieldCorrection -d 3 -s 4 -i $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii -o [ ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4.nii,${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii ] -c [ 50x50x50x50,0.0001] -r 1 -v 1 " 2>&1 | tee -a  $LOG
-N4BiasFieldCorrection -d 3 -s 4 -i $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii -o [ ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4.nii,${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii ] -c [ 50x50x50x50,0.0001] -r 1 -v 1   2>&1 | tee -a  $LOG
+binarize $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii 
+echo "N4BiasFieldCorrection -d 3 -s 4 -i $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii -o [ ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4.nii,${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii ] -c [ 50x50x50x50,0.0001] -r 1 -v 1 -x  ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii " 2>&1 | tee -a  $LOG
+N4BiasFieldCorrection -d 3 -s 4 -i $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii -o [ ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4.nii,${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii ] -c [ 50x50x50x50,0.0001] -r 1 -v 1  -x  ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii 2>&1 | tee -a  $LOG
+echo ImageMath 3 ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii m  ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii   ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii  2>&1 | tee -a  $LOG
+ImageMath 3 ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii m  ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii   ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii
 echo "====================================================================" 2>&1 | tee -a $LOG 
 # Upsample the N4 field
 ${INSTALL_PREFIX}/nii2tiff.sh  ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.nii ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.tif  float32 yes 2>&1 | tee -a  $LOG
 echo "============= Upsampling bias field to original image space =============" 2>&1 | tee -a $LOG 
-${INSTALL_PREFIX}/upsample_image.sh ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.tif ${OUTPUTDIR}/640_N4Field/  ${H}x${W}x${D}  bilinear true true float32  2>&1 | tee -a $LOG 
+${INSTALL_PREFIX}/upsample_image.sh ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.tif ${OUTPUTDIR}/640_N4Field/  ${H}x${W}x${D}  nearest false true float32  2>&1 | tee -a $LOG 
 echo "=============== Multiplying bias field with original image =============" 2>&1 | tee -a $LOG 
 # Multiply the N4 field with the original image, this will be used for registration and segmentation
 ${INSTALL_PREFIX}/N4Process.sh ${CHANNEL640} ${OUTPUTDIR}/640_N4Field/  $OUTPUTDIR/640_N4/ 2>&1 | tee -a $LOG 
+#rm -f ${OUTPUTDIR}/initmask.nii
 export CHANNEL640=${OUTPUTDIR}/640_N4/   
 
 
@@ -460,12 +464,12 @@ echo "================ Downsample bias corrected 640 image =================" 2>
 ${INSTALL_PREFIX}/Downsample3D.sh ${CHANNEL640} $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii ${DSFACTOR} $ATLASIMAGE ${OMETIFF} 2>&1 | tee -a  $LOG
 echo "====================================================================" 2>&1 | tee -a $LOG 
 ${INSTALL_PREFIX}/fix_header.sh $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii  $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii  25x25x25  2>&1 | tee -a  $LOG # Fix header, for the time being, hardcoded
-echo "=============== Removing background noise for better registration =============" 2>&1 | tee -a $LOG 
+#echo "=============== Removing background noise for better registration =============" 2>&1 | tee -a $LOG 
 # Remove background noise for better registration
-${INSTALL_PREFIX}/remove_background_noise.sh  $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii ${BG_NOISE_INIT} $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii ${BG_NOISE_SLOPE}  2>&1 | tee  -a $LOG
+#${INSTALL_PREFIX}/remove_background_noise.sh  $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii ${BG_NOISE_INIT} $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii ${BG_NOISE_SLOPE}  2>&1 | tee  -a $LOG
 # Approximate registration by ANTs
 echo "================ Atlas registration with ANTs =================" 2>&1 | tee -a $LOG 
-${INSTALL_PREFIX}/image_clamp.sh $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii  $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii 99 true 2>&1 | tee -a  $LOG
+${INSTALL_PREFIX}/image_clamp.sh $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii  $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii 99 true 2>&1 | tee -a  $LOG
 echo ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
 ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
 
