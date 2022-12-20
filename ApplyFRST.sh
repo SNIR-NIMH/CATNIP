@@ -6,15 +6,19 @@ exe_dir=`dirname "$0"`
 if [ $# -lt "3" ]; then
   echo "
   Usage:
-  ./ApplyFRST.sh INDIR OUTDIR NUMCPU  RADII
+  ./ApplyFRST.sh INDIR OUTDIR NUMCPU  RADII [Downsampled_Image]
 
-    INDIR      Input directory with channel 640 tif image, or a 3D volume
-    OUTDIR     Output directory where FRST transform files are written,
-               or a single tif file, which will be written as 3D tif
-               stack, e.g. FRST.tif
-    NUMCPU     Number of parallel cpus to be used
-    RADII      Vector of radii at which to compute transform. Comma
-               separated string if used in compiled code. Default is 2,3,4
+    INDIR           Input directory with channel 640 tif image, or a 3D volume
+    OUTDIR          Output directory where FRST transform files are written,
+                    or a single tif file, which will be written as 3D tif
+                    stack, e.g. FRST.tif
+    NUMCPU          Number of parallel cpus to be used
+    RADII           Vector of radii at which to compute transform. Comma
+                    separated string if used in compiled code. Default is 2,3,4
+    Downsampled_Img (Optional) A downsampled background-removed image to compute
+                    scaling factor. If it is not mentioned, then the original
+                    image (i.e. input_dir) will be downsampled by 6x6x5. For very
+                    large images, use the _brain.nii.gz 
   "
   exit 1
 fi
