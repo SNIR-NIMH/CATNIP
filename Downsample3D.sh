@@ -5,8 +5,8 @@ exe_dir=`dirname "$0"`
 if [ $# -lt "3" ]; then
     echo "Usage:
     ./Downsample3D.sh INPUTDIR OUTPUTIMAGE DSFACTOR TEMPLATE XML
-    INPUTDIR      Input directory containing tiff images
-    OUTPUTIMAGE   Output downsampled images
+    INPUTDIR      Input directory containing multiple 2D tif images
+    OUTPUTIMAGE   Output downsampled image (somefile.tif or somefile.nii), a single file
     DSFACTOR      Downsample factor, either a scalar (e.g. 5), or a comma
                   separared triplet (e.g. 5,5,4), meaning x-y dimensions will
                   be downsampled by 5, and z by 4. Useful if z resolution is
