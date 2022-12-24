@@ -50,7 +50,7 @@ if [ x"$ds" == "x" ];then
 fi
 export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=$numcpu
 
-FSLOUTPUTTYPE=NIFTI
+
 prefix=`remove_ext ${outvol}`
 #prefix=${outvol%.*}
 if [ -f "${prefix}.nii" ] || [ -f "${prefix}.nii.gz" ];then
@@ -99,9 +99,9 @@ $reg -d $dim -r [ $f, $m ,1]  -m mattes[  $f, $m , 1 , $bins, regular, $percenta
 echo antsApplyTransforms -d $dim -i $m -r $f -o ${prefix}.nii -n BSpline --float -f 0 -v 1 -t  "$prefix"1Warp.nii.gz -t "$prefix"0GenericAffine.mat
 antsApplyTransforms -d $dim -i $m -r $f -o ${prefix}.nii -n BSpline --float -f 0 -v 1 -t  "$prefix"1Warp.nii.gz -t "$prefix"0GenericAffine.mat
 
-fslmaths $outvol -thr 0 $outvol -odt float
-#echo ImageMath 3 $outvol ReplaceVoxelValue $outvol -65000 0 0
-#ImageMath 3 $outvol ReplaceVoxelValue $outvol -65000 0 0 
+#fslmaths $outvol -thr 0 $outvol -odt float
+echo ImageMath 3 $outvol ReplaceVoxelValue $outvol -65000 0 0
+ImageMath 3 $outvol ReplaceVoxelValue $outvol -65000 0 0 
 
 
 END=$(date +%s)

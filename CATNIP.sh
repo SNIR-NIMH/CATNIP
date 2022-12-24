@@ -266,7 +266,7 @@ shift
 done
 
 
-FSLOUTPUTTYPE=NIFTI
+
 
 # ========================= Set up paths and check for errors =========================
 
@@ -524,8 +524,6 @@ echo "=============== Computing midline by transforming atlas hemisphere mask ==
 echo "antsApplyTransforms -d 3 -i $ATLASHEMIMASK -r $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii -o $OUTPUTDIR/hemispheremask_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1 -t $OUTPUTDIR/atlasimage_reg1Warp.nii.gz -t $OUTPUTDIR/atlasimage_reg0GenericAffine.mat" 2>&1 | tee -a  $LOG
 antsApplyTransforms -d 3 -i $ATLASHEMIMASK -r $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii -o $OUTPUTDIR/hemispheremask_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1 -t $OUTPUTDIR/atlasimage_reg1Warp.nii.gz -t $OUTPUTDIR/atlasimage_reg0GenericAffine.mat   2>&1 | tee -a  $LOG
 
-#echo "fslmaths ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -mas ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -odt char" 2>&1 | tee -a  $LOG
-#fslmaths ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -mas ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -odt char
 echo ImageMath 3 ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii m ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii 2>&1 | tee -a  $LOG
 ImageMath 3 ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii m ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii
 # Mask the atlaslabel_def image for Generate_Stats code
