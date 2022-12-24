@@ -4,20 +4,30 @@ exe_name=$0
 exe_dir=`readlink -f ${exe_name}`
 exe_dir=`dirname ${exe_dir}`
 
-if [ $# -lt "4" ]; then
+if [ $# -lt "7" ]; then
   echo "Usage:
   ./Generate_Stats.sh CsvDir Label_info Segmentation Cell_Images
 
-CsvDir          Output directory where CSV files are written, each csv
-                contains info about each cell segmentation count
+CsvDir              Output directory where CSV files are written, each csv
+                    contains info about each cell segmentation count
                 
-Label_Info      A text file containing label names (usually present in 
-                /data/NIMH_MHSNIR/Clearmap/atlas/atlas_info.txt
+Label_Info          A text file containing label names (usually present in 
+                    /data/NIMH_MHSNIR/Clearmap/atlas/atlas_info.txt
                 
-Segmentation    Discreet segmentation label image where cells are to be counted
-
-Cell_images     Cell segmentation images, binary
-
+Segmentation_ds     Discreet registered label image (atlaslabel_def_masked.nii.gz) 
+                    but masked by the hemisphere mask, in the downsampled space. 
+                    The label boundaries are computed from this image.                    
+DSFACTOR            Same downsampling factor used to generate the downsampled
+                    image, e.g. 6x6x5. This must be a "x" separated string.
+Segmentation_origspace  Discreet registered label image
+                    (atlaslabel_def_origspace) on the original space. The cells
+                    are counted on this space.
+CellRadii           Cell radii used to compute FRST. This is used when the
+                    image is too. In that case, the X-Y axis is downsampled
+                    by the minimum of the cell radii without any loss of cell
+                    count. This must be a comma separated.
+Cell_images         Multiple cell segmentation images, binary, output of
+                    ApplyFRSTseg script, i.e. 640_FRST_seg folder content
 "
 exit 1
 fi

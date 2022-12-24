@@ -25,6 +25,13 @@ invert_binary_mask (){  # invert a binary mask
     
 }
 
+get_extension (){
+    NAME=$1    
+    EXT=`echo $NAME | tr "."  "\n" |tail -1`  # trim by dot, get the last one, but does not work for tar.gz, which
+    # gives only .gz. But this should be fine for practical purpose
+    echo $EXT
+    
+}
 
 INSTALL_PREFIX=$0
 INSTALL_PREFIX=`readlink -f $INSTALL_PREFIX`
@@ -93,9 +100,15 @@ Usage:
                       ** 1) This must already be in the "atlas orientation", i.e. cerebellum 
                       in bottom left side. See XX_FLIP_FLAG argument for the definition
                       of the atlas orientation
-                      ** 2) This must have the same dimension as the original image 
-                      "after" proper orientation, i.e., this mask will "NOT" be reoriented
-                      based on the flip flags.
+                      ** 2) This must be in one of the following space, 
+                      (a) Same dimension as the original image "after" proper orientation, 
+                      i.e., this mask will "NOT" be reoriented based on the flip flags.
+                      In this case, only use .tif or .tiff format.
+                      (b) This mask can also be a NIFTI (.nii or .nii.gz) image 
+                      if it is in the downsampled image space. It is recommended
+                      to run the pipeline once with correct downsampling factor
+                      to generate all outputs, then draw a binary mask on the
+                      640_downsampled_AxBxC_brain.nii.gz image.
                       
     BG_NOISE_PARAM  : (Optional) Background noise removal parameter to generate a
                       brain mask to be used for registration target. It is a comma-separated
@@ -337,6 +350,21 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
      echo "WARNING: If not, please exit this script and reorient the mask to the correct atlas orientation first. "
      echo "======================================================================================================="
      EXCLUDE_MASK=`readlink -f ${EXCLUDE_MASK}`
+     ext=`basename ${EXCLUDE_MASK}`
+     ext=`get_extension ${ext}`     
+     if [ "${ext}" == "tif" ] || [ "${ext}" == "tiff" ];then
+        echo "WARNING: You are using a tif image, so I assume the image is in correct \"atlas orientation\" but in the \"ORIGINAL\" image space"
+        IMGSPACE=original
+    elif [ "${ext}" == "nii" ] || [ "${ext}" == "gz" ];then  # nifti nii or nii.gz
+        echo "WARNING: You are using a NIFTI image, so I assume the image is in correct \"atlas orientation\" but in the \"DOWNSAMPLED\" image space"
+        IMGSPACE=atlas
+    else
+        echo "ERROR: I do not recognize this image.  The exclusion mask must be one of the two following formats,
+        1) A TIF (.tif or .tiff) image in correct \"atlas orientation\" but in the \"ORIGINAL\" image space
+        2) A NIFTI (.nii or .nii.gz) format image in correct \"atlas orientation\" but in the \"ORIGINAL\" image space
+        "
+        exit 1
+    fi
 fi
 
 
@@ -500,6 +528,9 @@ antsApplyTransforms -d 3 -i $ATLASHEMIMASK -r $OUTPUTDIR/640_downsampled_${DSFAC
 #fslmaths ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -mas ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -odt char
 echo ImageMath 3 ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii m ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii 2>&1 | tee -a  $LOG
 ImageMath 3 ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii m ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii
+# Mask the atlaslabel_def image for Generate_Stats code
+echo ImageMath 3 ${OUTPUTDIR}/atlaslabel_def_brain.nii m ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii  ${OUTPUTDIR}/atlaslabel_def.nii  2>&1 | tee -a  $LOG
+ImageMath 3 ${OUTPUTDIR}/atlaslabel_def_brain.nii m ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii  ${OUTPUTDIR}/atlaslabel_def.nii 
 
 echo "====================================================================" 2>&1 | tee -a $LOG 
 ${INSTALL_PREFIX}/nii2tiff.sh $OUTPUTDIR/hemispheremask_${DSFACTOR}.nii $OUTPUTDIR/hemispheremask_${DSFACTOR}.tif uint16 yes 2>&1 | tee -a  $LOG
@@ -516,8 +547,8 @@ echo "====================================================================" 2>&1
 echo "========================= Running FRST =============================" 2>&1 | tee -a $LOG 
 mkdir -p $OUTPUTDIR/640_FRST/
 mkdir -p $OUTPUTDIR/640_FRST_seg/
-echo ${INSTALL_PREFIX}/ApplyFRST.sh ${CHANNEL640} $OUTPUTDIR/640_FRST/ $NUMCPU  $CELLRADII  2>&1 | tee  -a $LOG
-${INSTALL_PREFIX}/ApplyFRST.sh ${CHANNEL640} $OUTPUTDIR/640_FRST/ $NUMCPU  $CELLRADII  2>&1 | tee -a  $LOG
+echo ${INSTALL_PREFIX}/ApplyFRST.sh ${CHANNEL640} $OUTPUTDIR/640_FRST/ $NUMCPU  $CELLRADII $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii 2>&1 | tee  -a $LOG
+${INSTALL_PREFIX}/ApplyFRST.sh ${CHANNEL640} $OUTPUTDIR/640_FRST/ $NUMCPU  $CELLRADII $OUTPUTDIR/640_downsampled_${DSFACTOR}_brain.nii 2>&1 | tee -a  $LOG
 echo "=================== Computing FRST segmentation ======================" 2>&1 | tee -a $LOG 
 echo "Creating FRST segmentation by thresholding"  2>&1 | tee -a $LOG 
 ${INSTALL_PREFIX}/ApplyFRSTseg.sh $OUTPUTDIR/640_FRST/ $OUTPUTDIR/640_FRST_seg/ "${THRESHOLD}"   2>&1 | tee -a  $LOG
@@ -557,10 +588,15 @@ gzip -vf  ${OUTPUTDIR}/*.nii
 if [ x"${EXCLUDE_MASK}" != "x" ];then
     echo "=============== Correcting CSV files and heatmaps with the exclusion mask ==============" 2>&1 | tee -a $LOG 
     mkdir -p ${OUTPUTDIR}/640_FRST_seg_corrected/
-    ${INSTALL_PREFIX}/Downsample3D.sh ${EXCLUDE_MASK} ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${DSFACTOR} $ATLASIMAGE ${OMETIFF} 2>&1 | tee -a  $LOG
+    #${INSTALL_PREFIX}/Downsample3D.sh ${EXCLUDE_MASK} ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${DSFACTOR} $ATLASIMAGE ${OMETIFF} 2>&1 | tee -a  $LOG
+    if [ "${IMGSPACE}" == "original" ];then
+        ${INSTALL_PREFIX}/Downsample3D.sh ${EXCLUDE_MASK} ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${DSFACTOR} $ATLASIMAGE ${OMETIFF} 2>&1 | tee -a  $LOG
+    else
+        echo ConvertImage 3 ${EXCLUDE_MASK} $OUTPUTDIR/exclusion_mask_downsampled_${DSFACTOR}.nii 1
+        ConvertImage 3 ${EXCLUDE_MASK} $OUTPUTDIR/exclusion_mask_downsampled_${DSFACTOR}.nii 1
+    fi
     ${INSTALL_PREFIX}/fix_header.sh $OUTPUTDIR/exclusion_mask_downsampled_${DSFACTOR}.nii  $OUTPUTDIR/exclusion_mask_downsampled_${DSFACTOR}.nii  25x25x25  2>&1 | tee -a  $LOG # Fix header, for the time being, hardcoded
-    #echo fslmaths ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -bin ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -odt float 2>&1 | tee -a  $LOG
-    #fslmaths ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -bin ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -odt float
+    # Extra binarization is needed because sometimes the exclusion mask is 0,255 instead of 0,1
     echo binarize ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii 2>&1 | tee -a  $LOG
     binarize ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii
     #${INSTALL_PREFIX}/mask_correction.sh  ${OUTPUTDIR}/atlaslabel_def_origspace_masked/ ${EXCLUDE_MASK} ${OUTPUTDIR}/640_FRST_seg/ ${OUTPUTDIR}/640_FRST_seg_corrected/ 2>&1 | tee -a $LOG 
@@ -572,10 +608,6 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
     echo antsApplyTransforms -d 3 -i ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -r ${ATLASIMAGE} -o ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -n NearestNeighbor -f 0 -v 1 -t [ ${OUTPUTDIR}/atlasimage_reg1InverseWarp.nii.gz ] -t [ ${OUTPUTDIR}/atlasimage_reg0GenericAffine.mat,1 ] --float     2>&1 | tee -a  $LOG
     antsApplyTransforms -d 3 -i ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -r ${ATLASIMAGE} -o ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -n NearestNeighbor -f 0 -v 1 -t [ ${OUTPUTDIR}/atlasimage_reg1InverseWarp.nii.gz ] -t [ ${OUTPUTDIR}/atlasimage_reg0GenericAffine.mat,1 ] --float    
     
-    #echo fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -sub 1 ${OUTPUTDIR}/exclusion_mask_atlasspace.nii  2>&1 | tee -a  $LOG
-    #fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -sub 1 ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
-    #echo fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -abs ${OUTPUTDIR}/exclusion_mask_atlasspace.nii 2>&1 | tee -a  $LOG
-    #fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -abs ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
     invert_binary_mask ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
     
     mkdir -p ${OUTPUTDIR}/heatmaps_atlasspace_corrected/
@@ -584,8 +616,6 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
         Y=`basename $file`
         Y=`remove_ext $Y`
         Y=${OUTPUTDIR}/heatmaps_atlasspace_corrected/${Y}        
-        #echo "fslmaths $file -mas ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${Y}.nii" 2>&1 | tee -a  $LOG
-        #fslmaths $file -mas ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${Y}.nii              
         echo ImageMath 3 ${Y}.nii  m $file ${OUTPUTDIR}/exclusion_mask_atlasspace.nii 
         ImageMath 3 ${Y}.nii  m $file ${OUTPUTDIR}/exclusion_mask_atlasspace.nii 
         ${INSTALL_PREFIX}/nii2tiff.sh ${Y}.nii ${Y}.tif float32 yes 2>&1 | tee -a  $LOG
