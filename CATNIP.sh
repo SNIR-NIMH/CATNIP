@@ -553,7 +553,7 @@ ${INSTALL_PREFIX}/ApplyFRSTseg.sh $OUTPUTDIR/640_FRST/ $OUTPUTDIR/640_FRST_seg/ 
 
 
 echo "============== Generating stats on the cell counts =================" 2>&1 | tee -a $LOG 
-${INSTALL_PREFIX}/Generate_Stats.sh $OUTPUTDIR/640_FRST_seg/ ${INSTALL_PREFIX}/atlas_${ATLASVERSION}/atlas_info.txt  $OUTPUTDIR/atlaslabel_def_origspace_masked/ $OUTPUTDIR/640_FRST_seg/FRSTseg*/  2>&1 | tee -a  $LOG
+${INSTALL_PREFIX}/Generate_Stats.sh $OUTPUTDIR/640_FRST_seg/ ${INSTALL_PREFIX}/atlas_${ATLASVERSION}/atlas_info.txt   $OUTPUTDIR/atlaslabel_def_brain.nii $DSFACTOR $OUTPUTDIR/atlaslabel_def_origspace_masked/  $CELLRADII $OUTPUTDIR/640_FRST_seg/FRSTseg*/  2>&1 | tee -a  $LOG
 
 
 # Generating cell heatmaps in atlas space
