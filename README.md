@@ -128,7 +128,7 @@ The input image should follow a few requirements,
 2. the input image must be of one single hemisphere plus a few slices of the other hemisphere (*not* the whole brain)
 3. the depth (z-axis) must be toward the midline
 
-Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the input image.
+Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the input image or an [example image](example_data.txt).
 
 The main script is ```CATNIP.sh```. An example usage is,
 ```
