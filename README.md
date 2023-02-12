@@ -1,8 +1,8 @@
 
-<h2 align="center">CATNIP</h2>
+<h1 align="center">CATNIP</h1>
 
   <p align="center">
-CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N</b>ice <b>I</b>mage processing <b>P</b>rogram
+CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N</b>ice <b>I</b>mage processing <b>P</b>rogram 
     <br />
     
   </p>
@@ -62,8 +62,8 @@ the ABA. Heatmaps of the cell counts are also generated for visualization and st
 ## Getting Started
 
 CATNIP is currently configured to run on a 64-bit Linux workstation or cluster. It can also
-be run on any Windows workstation via a virtualization software, such as VirtualBox or VMWare Player. 
-We have tested CATNIP on Red Hat Enterprise Linux 7.9, CentOS 8, and Rocky Linux 9.
+be run on any Windows workstation via a virtualization software. We have tested CATNIP on Red Hat 
+Enterprise Linux 7.9, CentOS 8, and Rocky Linux 9.
 
 CATNIP is primarily written in MATLAB, while parts (e.g., registration) of the pipeline are
 run via ANTs [[5]](#5) toolbox. Note that it is not required to have an active MATLAB license as all
@@ -91,7 +91,7 @@ Eiter download the binaries for the corresponding OS, or build from source
 ```
 https://github.com/ANTsX/ANTs/releases
 ```
-We have extensively tested the pipeline with version 2.2.0.
+We have extensively tested the pipeline with ANTs version 2.2.0.
 
 
 ### Installation
@@ -101,7 +101,7 @@ We have extensively tested the pipeline with version 2.2.0.
 ```
 export PATH=/home/user/ANTs-2.2.0/install/bin:${PATH}
 ```
-3. Add the MCR installation path, i.e. the v97 directory, to all the shell scripts' MCRROOT variable. 
+3. Add the MCR installation path, i.e. the v97 directory, to all of the included shell scripts' MCRROOT variable. 
 In each of the 15 shell scripts, replace the line containing ```MCRROOT=/usr/local/matlab-compiler/v97```
 to the path where the MCT is installed, e.g.,
 ```
@@ -116,6 +116,14 @@ if the MCR is installed in ```/home/user/MCR```.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+
+The input image should follow a few requirements,
+1. the input image must be within a folder in 2D slices,
+2. the input image must be of one single hemisphere plus a few slices of the other hemisphere (*not* the whole brain)
+3. the depth (z-axis) must be toward the midline
+
+Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the input image.
+
 The main script is ```CATNIP.sh```. An example usage is,
 ```
 ./CATNIP.sh --c640 /home/user/example_data/ --o /home/user/output/ --ob no --lrflip yes --udflip yes \
@@ -131,8 +139,9 @@ An example command in that scenario is the following,
 --exclude_mask example_data_artifact_mask.tif --mask_ovl_ratio 0.33
 ```
 
-
-For details of each of the arguments, please refer to the [documentation](CATNIP_documentation.pdf)
+For details of each of the arguments, please refer to the [documentation](CATNIP_documentation.pdf) section 5.
+These parameters are primarily applicable to 3.7x3.7x5um images. For images with different pixel sizes, the parameters
+may need to be changed. 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -187,13 +196,6 @@ Medical Image Analysis, 12(1):26-41.
 G. Loy and A. Zelinsky (2003)
 Fast radial symmetry for detecting points of interest.
 IEEE Trans. on Pattern Analysis and Machine Intelligence, 25(8):959-973.
-
-<a id="7">[7]</a> 
-S. W. Oh and et. al.  (2014)
-A mesoscale connectome of the mouse brain. 
-Nature, 508(7495):207-214
-
-
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
