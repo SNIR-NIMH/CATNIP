@@ -46,7 +46,7 @@ Usage:
 ./CATNIP.sh  --c640 CHANNEL640   --o OUTPUTDIR  --ob OB_FLAG  --udflip UPDOWN_FLIP_FLAG  \\
         --lrflip LR_FLIP_FLAG  --thr THRESHOLD  --dsfactor DSFACTOR  --cellradii RADII \\        
         --ncpu NUMCPU  --exclude_mask EXCLUSION_MASK_IMAGE  --bg_noise_param BG_NOISE_PARAM \\
-        --atlasversion v1  --mask_ovl_ratio  MASK_OVL_RATIO
+        --atlasversion v2  --mask_ovl_ratio  MASK_OVL_RATIO
     
     Required arguments:
     
@@ -120,7 +120,7 @@ Usage:
                       conservative, use lower number (e.g., 40,1.05).
                       
     ATLASVERSION    : (Optional) Either v1 (corresponds to uClear atlas) or v2 
-                      (corresponds to Clearmap2) atlas. Default is v1.
+                      (corresponds to Clearmap2) atlas. Default is v2.
                       
     MASK_OVL_RATIO    (Optional) A mask overlap ratio between 0 and 1. It is used only
                       when an EXCLUSION_MASK is mentioned. A ratio of 0.5 means a label
@@ -187,7 +187,7 @@ EXCLUDE_MASK=
 DSFACTOR=
 CELLRADII=
 BG_NOISE_PARAM=50,1.1
-ATLASVERSION=v1
+ATLASVERSION=v2
 MASKOVLRATIO=0.25
 
 # set --:
@@ -373,7 +373,7 @@ fi
 #=============================================================================
 
 RAND=`echo $RANDOM`
-RAND=$((RAND % 30)) # This is to disable race conditions for multiple Matlab compiler calls.
+RAND=$((RAND % 180)) # This is to disable race conditions for multiple Matlab compiler calls.
                     # This is specifically useful for HPC clusters while running lots of 
                     # instances of this code simultaneously.
 sleep $RAND
