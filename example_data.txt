@@ -1,8 +1,20 @@
-Example cleared brain (size 2560x2160x1004 pixels, 3.77x3.77x5 um pixel size)
+1. Example cleared brain, size 2560x2160x1004 pixels, 3.77x3.77x5 um pixel size.
+Approximate raw uncompressed image size 10GB
+https://hpc.nih.gov/~NIMH_MHSNIR/CATNIP/example_data.zip
 
-https://hpc.nih.gov/~roys5/example_data.zip
+
+Processed results, approximate file size 14GB.
+https://hpc.nih.gov/~NIMH_MHSNIR/CATNIP/example_data_processed.zip
+
+This data includes potential artifact mask that can be used to exclude areas with
+artifacts from any cell count related computation. See the documentation for
+detailed explanation of how an artifact mask can be used
 
 
-Processed results
+2. Example large cleared brain, size 13413x10130x1786 pixels, 0.946x0.946x4 um pixel size.
+Approximate raw uncompressed image size 450GB
+https://hpc.nih.gov/~NIMH_MHSNIR/CATNIP/example_data_large.zip
 
-https://hpc.nih.gov/~roys5/example_data_2022-12-11_19-25-03.zip
+
+Processed results, approximate file size 500GB.
+https://hpc.nih.gov/~NIMH_MHSNIR/CATNIP/example_data_large_processed.zip
