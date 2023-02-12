@@ -31,6 +31,8 @@ CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N
   </ol>
 </details>
 
+![](https://github.com/snehashis-roy/CATNIP/blob/master/imgs/movie1.gif)
+
 
 
 <!-- ABOUT THE PROJECT -->
