@@ -97,18 +97,19 @@ We have extensively tested the pipeline with ANTs version 2.2.0.
 ### Installation
 
 1. Install the MCR (v97) to somewhere suitable.
-2. Install ANTs binaries and add the binary path to shell \$PATH
-```
-export PATH=/home/user/ANTs-2.2.0/install/bin:${PATH}
-```
-3. Add the MCR installation path, i.e. the v97 directory, to all of the included shell scripts' MCRROOT variable. 
+
+2. Add the MCR installation path, i.e. the v97 directory, to all of the included shell scripts' MCRROOT variable. 
 In each of the 15 shell scripts, replace the line containing ```MCRROOT=/usr/local/matlab-compiler/v97```
-to the path where the MCT is installed, e.g.,
+to the path where the MCR is installed, e.g.,
 ```
 MCRROOT=/home/user/MCR/v97
 ```
 if the MCR is installed in ```/home/user/MCR```.
 
+3. Install ANTs binaries and add the binary path to shell \$PATH
+```
+export PATH=/home/user/ANTs-2.2.0/install/bin:${PATH}
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
