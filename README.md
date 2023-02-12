@@ -1,12 +1,13 @@
 
 <h1 align="center">CATNIP</h1>
 
-  <p align="center">
+ <p align="center">
 CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N</b>ice <b>I</b>mage processing <b>P</b>rogram 
-    <br />
-    
-  </p>
+<br /> 
+<p>
 </div>
+
+
 
 <a name="readme-top"></a>
 
@@ -31,7 +32,7 @@ CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N
   </ol>
 </details>
 
-![](https://github.com/snehashis-roy/CATNIP/blob/master/imgs/movie1.gif)
+
 
 
 
@@ -58,7 +59,9 @@ the ABA. Heatmaps of the cell counts are also generated for visualization and st
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
+<p align="center">
+  <img src="https://github.com/snehashis-roy/CATNIP/blob/master/img/movie1.gif" alt="animated" />
+</p>
 
 <!-- GETTING STARTED -->
 ## Getting Started
