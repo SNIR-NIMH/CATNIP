@@ -132,7 +132,7 @@ An example command in that scenario is the following,
 ```
 
 
-For details of each of the arguments, please refer to the [Documentation](CATNIP_documentation.pdf)
+For details of each of the arguments, please refer to the [documentation](CATNIP_documentation.pdf)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
