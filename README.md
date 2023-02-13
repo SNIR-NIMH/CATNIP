@@ -71,7 +71,7 @@ be run on any Windows workstation via a virtualization software. We have tested 
 Enterprise Linux 7.9, CentOS 8, and Rocky Linux 9.
 
 CATNIP is primarily written in MATLAB, while parts (e.g., registration) of the pipeline are
-run via ANTs [[5]](#5) toolbox. Note that it is not required to have an active MATLAB license as all
+run via ANTs [[5]](#5) toolbox. Note that it is *not* required to have an active MATLAB license as all
 codes are compiled. The pipeline is optimized to use minimum amount of memory at the cost of
 repeated read/write operations from disk. Minimum requirement to run the pipeline is a 8-core
 CPU, 32GB RAM, and a reasonably fast drive. A recommended requirement is 12-core CPU,
@@ -128,7 +128,7 @@ The input image should follow a few requirements,
 2. the input image must be of one single hemisphere plus a few slices of the other hemisphere (*not* the whole brain)
 3. the depth (z-axis) must be toward the midline
 
-Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the input image.
+Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the input image or an [example image](example_data.txt).
 
 The main script is ```CATNIP.sh```. An example usage is,
 ```
