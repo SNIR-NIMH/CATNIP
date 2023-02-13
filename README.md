@@ -71,7 +71,7 @@ be run on any Windows workstation via a virtualization software. We have tested 
 Enterprise Linux 7.9, CentOS 8, and Rocky Linux 9.
 
 CATNIP is primarily written in MATLAB, while parts (e.g., registration) of the pipeline are
-run via ANTs [[5]](#5) toolbox. Note that it is not required to have an active MATLAB license as all
+run via ANTs [[5]](#5) toolbox. Note that it is *not* required to have an active MATLAB license as all
 codes are compiled. The pipeline is optimized to use minimum amount of memory at the cost of
 repeated read/write operations from disk. Minimum requirement to run the pipeline is a 8-core
 CPU, 32GB RAM, and a reasonably fast drive. A recommended requirement is 12-core CPU,
