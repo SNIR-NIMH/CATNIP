@@ -60,7 +60,7 @@ the ABA. Heatmaps of the cell counts are also generated for visualization and st
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <p align="center">
-  <img src="https://github.com/snehashis-roy/CATNIP/blob/master/img/movie1.gif" alt="animated" />
+  <img src="https://github.com/snehashis-roy/CATNIP/blob/master/img/movie2.gif" alt="animated" height="300"/>  
 </p>
 
 <!-- GETTING STARTED -->
