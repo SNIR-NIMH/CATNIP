@@ -14,6 +14,11 @@ if [ $# -lt "3" ]; then
                factor should be an integer so that,
                dim(INPUT) = dsfactor x dim(N4FIELD)
  OUTPUTDIR     Output directory where corrected images are written
+ DSFACTOR      (Optional) A downsampling factor to downsample the field image
+               to compute its mode. Default 5x5x5. It can be same as the
+               downsampling factor used originally. It must be string separated
+               by x, e.g. 6x6x5
+ 
   "
   exit 1
 fi
@@ -24,12 +29,14 @@ LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/bin/glnxa64 ;
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/os/glnxa64;
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/opengl/lib/glnxa64;
 export LD_LIBRARY_PATH;
-IN=$1
-N4=$2
-OUT=$3
-if [ ! -d "$OUT" ];then
-    mkdir -p $OUT
-fi
-echo ${exe_dir}/N4Process $IN $N4 $OUT
-${exe_dir}/N4Process $IN $N4 $OUT
+
+
+args=
+while [ $# -gt 0 ]; do
+  token=$1
+  args="${args} ${token}" 
+  shift
+done
+echo ${exe_dir}/N4Process $args
+${exe_dir}/N4Process $args
 

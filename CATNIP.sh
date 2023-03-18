@@ -482,7 +482,7 @@ echo "============= Upsampling bias field to original image space ============="
 ${INSTALL_PREFIX}/upsample_image.sh ${OUTPUTDIR}/640_downsampled_${DSFACTOR}_N4Field.tif ${OUTPUTDIR}/640_N4Field/  ${H}x${W}x${D}  nearest false true float32  2>&1 | tee -a $LOG 
 echo "=============== Multiplying bias field with original image =============" 2>&1 | tee -a $LOG 
 # Multiply the N4 field with the original image, this will be used for registration and segmentation
-${INSTALL_PREFIX}/N4Process.sh ${CHANNEL640} ${OUTPUTDIR}/640_N4Field/  $OUTPUTDIR/640_N4/ 2>&1 | tee -a $LOG 
+${INSTALL_PREFIX}/N4Process.sh ${CHANNEL640} ${OUTPUTDIR}/640_N4Field/  $OUTPUTDIR/640_N4/ ${DSFACTOR} 2>&1 | tee -a $LOG 
 #rm -f ${OUTPUTDIR}/initmask.nii
 export CHANNEL640=${OUTPUTDIR}/640_N4/   
 
