@@ -467,6 +467,7 @@ echo "================ Downsample 640 channel for N4 correction ================
 # Downsample by DSFACTOR
 ${INSTALL_PREFIX}/Downsample3D.sh ${CHANNEL640} $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii $DSFACTOR $ATLASIMAGE ${OMETIFF} 2>&1 | tee -a  $LOG
 ${INSTALL_PREFIX}/fix_header.sh $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii  $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii  25x25x25  | tee -a  $LOG # Fix header, for the time being, hardcoded
+cp $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii $OUTPUTDIR/640_downsampled_${DSFACTOR}_orig.nii
 ${INSTALL_PREFIX}/remove_background_noise.sh  $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii ${BG_NOISE_INIT} $OUTPUTDIR/640_downsampled_${DSFACTOR}.nii ${BG_NOISE_SLOPE}  2>&1 | tee  -a $LOG
 echo "================= Running N4 bias field correction  ====================" 2>&1 | tee -a $LOG 
 # Run N4 in downsampled space for speed
