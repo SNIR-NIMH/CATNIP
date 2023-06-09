@@ -28,6 +28,7 @@ CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N
     <li><a href="#usage">Usage</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
+   <li><a href="#publications">Publications</a></li>
     <li><a href="#references">References</a></li>
   </ol>
 </details>
@@ -169,6 +170,16 @@ Snehashis Roy - email@snehashis.roy@nih.gov
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+
+<!-- Publications -->
+## Publications
+<a id="1">[1]</a> 
+D. Bakalar, O. Gavrilova, S. Z. Jiang, H.‐Y. Zhang, S. Roy, S. K. Williams, N. Liu, S. Wisser, T. B. Usdin, L. E. Eiden (2023). 
+Constitutive and conditional PACAP deletion reveals distinct phenotypes driven by developmental versus neurotransmitter actions of PACAP.
+Journal of Neuroendocrinology, e13286.
+
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- REFERENCE -->
 ## References
