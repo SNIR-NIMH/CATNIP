@@ -104,7 +104,7 @@ We have extensively tested the pipeline with ANTs version 2.2.0.
 
 1. Install the MCR (v912) to somewhere suitable.
 
-2. Add the MCR installation path, i.e. the v97 directory, to all of the included shell scripts' MCRROOT variable. 
+2. Add the MCR installation path, i.e. the v912 directory, to all of the included shell scripts' MCRROOT variable. 
 In each of the 16 shell scripts, replace the line containing ```MCRROOT=/usr/local/matlab-compiler/v912```
 to the path where the MCR is installed, e.g.,
 ```
