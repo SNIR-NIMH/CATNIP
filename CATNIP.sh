@@ -38,7 +38,7 @@ cat << EOF
 
 Usage:
 
-./BigClearmapPipeline_v3.sh  --cfos CHANNELFOS   --o OUTPUTDIR  --ob OB_FLAG  --udflip UPDOWN_FLIP_FLAG  \\
+./CATNIP.sh  --cfos CHANNELFOS   --o OUTPUTDIR  --ob OB_FLAG  --udflip UPDOWN_FLIP_FLAG  \\
         --lrflip LR_FLIP_FLAG  --thr THRESHOLD  --dsfactor DSFACTOR  --cellradii RADII \\        
         --ncpu NUMCPU  --exclude_mask EXCLUSION_MASK_IMAGE  --bg_noise_param BG_NOISE_PARAM \\
         --atlasversion v2  --mask_ovl_ratio  MASK_OVL_RATIO
@@ -135,7 +135,7 @@ Usage:
                       
     
     Example: 
-    ./BigClearmapPipeline_v3.sh --cfos /home/user/input/640/ --o /home/user/output  \\
+    ./CATNIP.sh --cfos /home/user/input/640/ --o /home/user/output  \\
         --ob yes --udflip no --lrflip yes --cellradii 3,4,5,6 --thr 5000:5000:60000  \\
          --ncpu 12 --dsfactor 9x9x7  --exclude_mask  /home/user/artifact_mask_9x9x7.nii.gz \\
          --atlasversion v2 --bg_noise_param 50,1.05
