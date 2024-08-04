@@ -133,7 +133,7 @@ Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details a
 
 The main script is ```CATNIP.sh```. An example usage is,
 ```
-./CATNIP.sh --c640 /home/user/example_data/ --o /home/user/output/ --ob no --lrflip yes --udflip yes \
+./CATNIP.sh --cfos /home/user/example_data/ --o /home/user/output/ --ob no --lrflip yes --udflip yes \
 --thr 1000:1000:5000 --dsfactor 6x6x5 --cellradii 2,3,4 --ncpu 16 --atlasversion v2
 ```
 
@@ -141,7 +141,7 @@ If the images have some artifacts coming from shadows, bubbles, or tearing, it i
 exclusion mask. The mask is solely used to exclude cell counts from the labels that overlap with the mask.
 An example command in that scenario is the following,
 ```
-./CATNIP.sh --c640 /home/user/example_data/ --o /home/user/output/ --ob no --lrflip yes --udflip yes \
+./CATNIP.sh --cfos /home/user/example_data/ --o /home/user/output/ --ob no --lrflip yes --udflip yes \
 --thr 1000:1000:5000 --dsfactor 6x6x5 --cellradii 2,3,4 --ncpu 16 --atlasversion v2 \
 --exclude_mask example_data_artifact_mask.tif --mask_ovl_ratio 0.33
 ```
