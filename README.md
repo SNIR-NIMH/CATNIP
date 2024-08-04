@@ -69,7 +69,7 @@ the ABA. Heatmaps of the cell counts are also generated for visualization and st
 
 CATNIP is currently configured to run on a 64-bit Linux workstation or cluster. It can also
 be run on any Windows workstation via a virtualization software. We have tested CATNIP on Red Hat 
-Enterprise Linux 7.9, CentOS 8, and Rocky Linux 9.
+Enterprise Linux 8.x and Rocky Linux 9.
 
 CATNIP is primarily written in MATLAB, while parts (e.g., registration) of the pipeline are
 run via ANTs [[5]](#5) toolbox. Note that it is *not* required to have an active MATLAB license as all
@@ -86,7 +86,7 @@ Detailed installation instructions are given in the [documentation](CATNIP_Docum
 
 * Matlab Compiler Runtime (MCR) 
 
-Download the 64-bit Linux MCR installer for MATLAB 2019b (v97)
+Download the 64-bit Linux MCR installer for MATLAB 2022a (v912)
 ```
 https://www.mathworks.com/products/compiler/matlab-runtime.html
 ```
@@ -102,13 +102,13 @@ We have extensively tested the pipeline with ANTs version 2.2.0.
 
 ### Installation
 
-1. Install the MCR (v97) to somewhere suitable.
+1. Install the MCR (v912) to somewhere suitable.
 
 2. Add the MCR installation path, i.e. the v97 directory, to all of the included shell scripts' MCRROOT variable. 
-In each of the 15 shell scripts, replace the line containing ```MCRROOT=/usr/local/matlab-compiler/v97```
+In each of the 16 shell scripts, replace the line containing ```MCRROOT=/usr/local/matlab-compiler/v912```
 to the path where the MCR is installed, e.g.,
 ```
-MCRROOT=/home/user/MCR/v97
+MCRROOT=/home/user/MCR/v912
 ```
 if the MCR is installed in ```/home/user/MCR```.
 
