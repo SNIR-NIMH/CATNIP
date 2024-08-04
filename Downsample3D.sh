@@ -28,7 +28,7 @@ export MCR_INHIBIT_CTF_LOCK=1
 export MCR_CACHE_ROOT=/tmp/mcr_${USER}_${RANDOM}
 mkdir -p ${MCR_CACHE_ROOT}
 
-MCRROOT=/usr/local/matlab-compiler/v97
+MCRROOT=/usr/local/matlab-compiler/v912
 LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/bin/glnxa64 ;
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/os/glnxa64;

@@ -23,8 +23,10 @@ if [ $# -lt "4" ];then
     exit 1
 fi
 
-MCRROOT=/usr/local/matlab-compiler/v97
+MCRROOT=/usr/local/matlab-compiler/v912
 export MCR_INHIBIT_CTF_LOCK=1
+export MCR_CACHE_ROOT=/tmp/mcr_${USER}_${RANDOM}
+mkdir -p ${MCR_CACHE_ROOT}
 LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/bin/glnxa64 ;
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/os/glnxa64;
@@ -40,5 +42,5 @@ while [ $# -gt 0 ]; do
 done
 echo ${exe_dir}/image_math $args
 ${exe_dir}/image_math $args
-
+rm -rf ${MCR_CACHE_ROOT}
 

@@ -15,8 +15,11 @@ if [ $# -lt "5" ]; then
   "
   exit 1
 fi
+
+MCRROOT=/usr/local/matlab-compiler/v912
 export MCR_INHIBIT_CTF_LOCK=1
-MCRROOT=/usr/local/matlab-compiler/v97
+export MCR_CACHE_ROOT=/tmp/mcr_${USER}_${RANDOM}
+mkdir -p ${MCR_CACHE_ROOT}
 LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/bin/glnxa64 ;
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/os/glnxa64;
@@ -33,4 +36,4 @@ done
 echo ${exe_dir}/FlipImages $args
 ${exe_dir}/FlipImages $args
 
-
+rm -rf ${MCR_CACHE_ROOT}
