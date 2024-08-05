@@ -126,10 +126,14 @@ export PATH=/home/user/ANTs-2.2.0/install/bin:${PATH}
 
 The input image should follow a few requirements,
 1. the input image must be within a folder in 2D slices,
-2. the input image must be of one single hemisphere plus a few slices of the other hemisphere (*not* the whole brain)
-3. the depth (z-axis) must be toward the midline
+2. the input image must be either one single hemisphere plus a few slices of the other hemisphere in sagittal
+   orientation or whole brain in axial/horizontal orientation. 
+4. the depth (z-axis) must be toward the midline for single hemisphere sagittal orientation or cerebellum to
+   brainstem for whole brain horizontal orientation.
 
-Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the input image or an [example image](example_data.txt).
+Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the correct choice
+of atlas. Please also check [documentation](CATNIP_Documentation.pdf) section 5 about the 
+correct orientation of the input image or an [example image](example_data.txt).
 
 The main script is ```CATNIP.sh```. An example usage is,
 ```
