@@ -97,7 +97,9 @@ Either download the binaries for the corresponding OS, or build from source
 ```
 https://github.com/ANTsX/ANTs/releases
 ```
-We have extensively tested the pipeline with ANTs version 2.2.0.
+We have extensively tested the pipeline with ANTs version 2.2.0. Note that with
+newer versions of ANTs, it is possible that some command line arguments
+we used may be deprecated.
 
 
 ### Installation
