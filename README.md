@@ -93,11 +93,13 @@ https://www.mathworks.com/products/compiler/matlab-runtime.html
 
 * ANTs
 
-Eiter download the binaries for the corresponding OS, or build from source
+Either download the binaries for the corresponding OS, or build from source
 ```
 https://github.com/ANTsX/ANTs/releases
 ```
-We have extensively tested the pipeline with ANTs version 2.2.0.
+We have extensively tested the pipeline with ANTs version 2.2.0. Note that with
+newer versions of ANTs, it is possible that some command line arguments
+we used may be deprecated.
 
 
 ### Installation
@@ -126,10 +128,14 @@ export PATH=/home/user/ANTs-2.2.0/install/bin:${PATH}
 
 The input image should follow a few requirements,
 1. the input image must be within a folder in 2D slices,
-2. the input image must be of one single hemisphere plus a few slices of the other hemisphere (*not* the whole brain)
-3. the depth (z-axis) must be toward the midline
+2. the input image must be either one single hemisphere plus a few slices of the other hemisphere in sagittal
+   orientation or whole brain in axial/horizontal orientation. 
+4. the depth (z-axis) must be toward the midline for single hemisphere sagittal orientation or cerebellum to
+   brainstem for whole brain horizontal orientation.
 
-Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the input image or an [example image](example_data.txt).
+Please see the [documentation](CATNIP_Documentation.pdf) section 4 for details about the correct choice
+of atlas. Please also check [documentation](CATNIP_Documentation.pdf) section 5 about the 
+correct orientation of the input image or an [example image](example_data.txt).
 
 The main script is ```CATNIP.sh```. An example usage is,
 ```
@@ -146,9 +152,9 @@ An example command in that scenario is the following,
 --exclude_mask example_data_artifact_mask.tif --mask_ovl_ratio 0.33
 ```
 
-For details of each of the arguments, please refer to the [documentation](CATNIP_documentation.pdf) section 5.
-These parameters are primarily applicable to 3.7x3.7x5um images. For images with different pixel sizes, the parameters
-may need to be changed. 
+For details of each of the arguments, please refer to the [documentation](CATNIP_documentation.pdf) section 6.
+These default parameters are primarily applicable to 3.7x3.7x5um images. For images with different pixel sizes, the parameters
+may need to be changed, e.g., see Fig 4 of the [documentation](CATNIP_documentation.pdf).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
