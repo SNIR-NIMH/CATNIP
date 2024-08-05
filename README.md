@@ -150,9 +150,9 @@ An example command in that scenario is the following,
 --exclude_mask example_data_artifact_mask.tif --mask_ovl_ratio 0.33
 ```
 
-For details of each of the arguments, please refer to the [documentation](CATNIP_documentation.pdf) section 5.
-These parameters are primarily applicable to 3.7x3.7x5um images. For images with different pixel sizes, the parameters
-may need to be changed. 
+For details of each of the arguments, please refer to the [documentation](CATNIP_documentation.pdf) section 6.
+These default parameters are primarily applicable to 3.7x3.7x5um images. For images with different pixel sizes, the parameters
+may need to be changed, e.g., see Fig 4 of the [documentation](CATNIP_documentation.pdf).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
