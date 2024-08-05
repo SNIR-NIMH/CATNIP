@@ -93,7 +93,7 @@ https://www.mathworks.com/products/compiler/matlab-runtime.html
 
 * ANTs
 
-Eiter download the binaries for the corresponding OS, or build from source
+Either download the binaries for the corresponding OS, or build from source
 ```
 https://github.com/ANTsX/ANTs/releases
 ```
