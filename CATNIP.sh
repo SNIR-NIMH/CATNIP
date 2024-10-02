@@ -411,56 +411,56 @@ export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=$NUMCPU
 
 if [ "$ATLASVERSION" == "v1" ];then
     if [ "$OBFLAG" == "yes" ];then    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_withOB_RHplus49_N4.nii    
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/annotation_atlasImage.Iteration.002_-x-z_renormalized_withOB.nii    
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_withOB_RHplus49_N4.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/annotation_atlasImage.Iteration.002_-x-z_renormalized_withOB.nii.gz  
     else    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_withoutOB_RHplus49_N4.nii    
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/annotation_atlasImage.Iteration.002_-x-z_renormalized_withoutOB_v2.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_withoutOB_RHplus49_N4.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/annotation_atlasImage.Iteration.002_-x-z_renormalized_withoutOB_v2.nii.gz
     fi
 elif [ "$ATLASVERSION" == "v2" ];then  # v2 atlas from Clearmap2, downloaded from  https://github.com/ChristophKirst/ClearMap2
     if [ "$OBFLAG" == "yes" ];then    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_hemisphere_N4.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_hemisphere_nooutlier.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_hemisphere_N4.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_hemisphere_nooutlier.nii.gz
     else    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_hemisphere_N4_withoutOB.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_hemisphere_nooutlier_withoutOB.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_hemisphere_N4_withoutOB.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_hemisphere_nooutlier_withoutOB.nii.gz
     fi
 
 elif [ "$ATLASVERSION" == "v3" ];then  # v3 atlas is the Cerebellum free version of the v2 atlas
     if [ "$OBFLAG" == "yes" ];then    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_hemisphere_N4_noCB.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_hemisphere_nooutlier_noCB.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_hemisphere_N4_noCB.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_hemisphere_nooutlier_noCB.nii.gz
     else    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_hemisphere_N4_withoutOB_noCB.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_hemisphere_nooutlier_withoutOB_noCB.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_hemisphere_N4_withoutOB_noCB.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_hemisphere_nooutlier_withoutOB_noCB.nii.gz
     fi
     
 elif [ "$ATLASVERSION" == "v4" ];then  # v4 atlas is the wholebrain version of axial images from new 3i microscope
     if [ "$OBFLAG" == "yes" ];then    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_nooutlier.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_nooutlier.nii.gz
     else    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noOB.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_nooutlier_noOB.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noOB.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_nooutlier_noOB.nii.gz
     fi
     WHOLEBRAIN=true
     
 elif [ "$ATLASVERSION" == "v5" ];then  # v4 atlas is the wholebrain version of axial images from new 3i microscope
     if [ "$OBFLAG" == "yes" ];then    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial.nii.gz
     else    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noOB.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noOB.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noOB.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noOB.nii.gz
     fi
     WHOLEBRAIN=true
 elif [ "$ATLASVERSION" == "v6" ];then  # v5 atlas but no cerebellum or brainstem
     if [ "$OBFLAG" == "yes" ];then    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noCB.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noCB.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noCB.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noCB.nii.gz
     else    
-        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noOB_noCB.nii
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noOB_noCB.nii
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noOB_noCB.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noOB_noCB.nii.gz
     fi
     WHOLEBRAIN=true
 
