@@ -706,7 +706,7 @@ pigz -vf -p $NUMCPU ${OUTPUTDIR}/*.nii
 END=$(date +%s)
 DIFF=$(( $END - $START ))
 ((sec=DIFF%60, DIFF/=60, min=DIFF%60, hrs=DIFF/60))
-echo "Clearmap pipeline took $hrs HRS $min MIN $sec SEC"   2>&1 | tee -a  $LOG
+echo "CATNIP pipeline took $hrs HRS $min MIN $sec SEC"   2>&1 | tee -a  $LOG
 echo "=================================================================================="   2>&1 | tee -a  $LOG
 
 
