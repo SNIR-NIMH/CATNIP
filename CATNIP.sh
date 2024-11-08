@@ -125,7 +125,8 @@ Usage:
                           brainstem back in depth, with new colormap where left and 
                           right hemisphere labels have alternating numbers.
                       v6: v5 atlas but excludes brainstem and cerebellum
-                      
+                      v7: v5 atlas but in coronal orientation, OB front and 
+                          cerebellum back in depth.
                       
     MASK_OVL_RATIO    (Optional) A mask overlap ratio between 0 and 1. It is used only
                       when an EXCLUSION_MASK is mentioned. A ratio of 0.5 means a label
@@ -354,8 +355,8 @@ if [ x"${THRESHOLD}" == "x" ];then
     THRESHOLD="5000:5000:60000"    
 fi
 
-if  [ "${ATLASVERSION}" != "v1" ] && [ "${ATLASVERSION}" != "v2" ] && [ "${ATLASVERSION}" != "v3" ] && [ "${ATLASVERSION}" != "v4" ] && [ "${ATLASVERSION}" != "v5" ] && [ "${ATLASVERSION}" != "v6" ];then
-    echo "ERROR: ATLASVERSION flag (--atlasversion XX) must be v1/v2/v3/v4/v5/v6. You entered $ATLASVERSION"
+if  [ "${ATLASVERSION}" != "v1" ] && [ "${ATLASVERSION}" != "v2" ] && [ "${ATLASVERSION}" != "v3" ] && [ "${ATLASVERSION}" != "v4" ] && [ "${ATLASVERSION}" != "v5" ] && [ "${ATLASVERSION}" != "v6" ] && [ "${ATLASVERSION}" != "v7" ];then
+    echo "ERROR: ATLASVERSION flag (--atlasversion XX) must be v1/v2/v3/v4/v5/v6/v7. You entered $ATLASVERSION"
     exit 1            
 fi
 
@@ -412,7 +413,7 @@ export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=$NUMCPU
 if [ "$ATLASVERSION" == "v1" ];then
     if [ "$OBFLAG" == "yes" ];then    
         ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_withOB_RHplus49_N4.nii.gz
-        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/annotation_atlasImage.Iteration.002_-x-z_renormalized_withOB.nii.gz  
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/annotation_atlasImage.Iteration.002_-x-z_renormalized_withOB.nii.gz
     else    
         ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_withoutOB_RHplus49_N4.nii.gz
         ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/annotation_atlasImage.Iteration.002_-x-z_renormalized_withoutOB_v2.nii.gz
@@ -463,7 +464,15 @@ elif [ "$ATLASVERSION" == "v6" ];then  # v5 atlas but no cerebellum or brainstem
         ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noOB_noCB.nii.gz
     fi
     WHOLEBRAIN=true
-
+elif [ "$ATLASVERSION" == "v7" ];then  # v7 atlas is the wholebrain version of coronal images but with modified LUT (v5 --> coronal)
+    if [ "$OBFLAG" == "yes" ];then    
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial.nii.gz
+    else    
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_reference_axial_noOB.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noOB.nii.gz
+    fi
+    WHOLEBRAIN=true
 fi
 ATLASHEMIMASK=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_hemispheremask.nii.gz
     
@@ -592,8 +601,12 @@ if [ "$WHOLEBRAIN" == "false" ];then
     ${INSTALL_PREFIX}/image_math.sh $OUTPUTDIR/atlaslabel_def_origspace/  $OUTPUTDIR/hemispheremask_origspace/ $OUTPUTDIR/atlaslabel_def_origspace_masked/   multiply  $NUMCPU 2>&1 | tee -a $LOG 
     echo "====================================================================" 2>&1 | tee -a $LOG 
 else
-    ln -vs ${OUTPUTDIR}/atlaslabel_def.nii ${OUTPUTDIR}/atlaslabel_def_brain.nii   2>&1 | tee -a $LOG  
-    ln -vs ${OUTPUTDIR}/atlaslabel_def_origspace/  ${OUTPUTDIR}/atlaslabel_def_origspace_masked   2>&1 | tee -a $LOG  # not a / at the end of the "masked"
+    #ln -vs ${OUTPUTDIR}/atlaslabel_def.nii ${OUTPUTDIR}/atlaslabel_def_brain.nii   2>&1 | tee -a $LOG  
+    #ln -vs ${OUTPUTDIR}/atlaslabel_def_origspace/  ${OUTPUTDIR}/atlaslabel_def_origspace_masked   2>&1 | tee -a $LOG  # not a / at the end of the "masked"
+    echo fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii
+    fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii
+    echo fslmaths ${OUTPUTDIR}/atlasimage_reg.nii   -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlasimage_reg_brain.nii
+    fslmaths ${OUTPUTDIR}/atlasimage_reg.nii   -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlasimage_reg_brain.nii
     
     
     ${INSTALL_PREFIX}/nii2tiff.sh ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii $OUTPUTDIR/hemispheremask_${DSFACTOR}.tif uint16 yes 2>&1 | tee -a  $LOG
@@ -601,7 +614,8 @@ else
     ${INSTALL_PREFIX}/upsample_image.sh  $OUTPUTDIR/hemispheremask_${DSFACTOR}.tif  $OUTPUTDIR/hemispheremask_origspace/ ${H}x${W}x${D} nearest false true uint16 2>&1 | tee  -a $LOG 
     echo "============== Masking image by hemisphere mask =================" 2>&1 | tee -a $LOG 
     ${INSTALL_PREFIX}/image_math.sh ${CHANNEL640} $OUTPUTDIR/hemispheremask_origspace/  $OUTPUTDIR/N4_masked/   multiply  $NUMCPU 2>&1 | tee -a $LOG 
-    
+    echo "============== Masking atlas label by hemisphere mask =================" 2>&1 | tee -a $LOG 
+    ${INSTALL_PREFIX}/image_math.sh ${OUTPUTDIR}/atlaslabel_def_origspace/ $OUTPUTDIR/hemispheremask_origspace/  $OUTPUTDIR/atlaslabel_def_origspace_masked/   multiply  $NUMCPU 2>&1 | tee -a $LOG 
 fi
 
 
@@ -620,22 +634,14 @@ echo "============== Generating stats on the cell counts =================" 2>&1
 ${INSTALL_PREFIX}/Generate_Stats.sh $OUTPUTDIR/FRST_seg/ ${INSTALL_PREFIX}/atlas_${ATLASVERSION}/atlas_info.txt   $OUTPUTDIR/atlaslabel_def_brain.nii $DSFACTOR $OUTPUTDIR/atlaslabel_def_origspace_masked/  $CELLRADII $OUTPUTDIR/FRST_seg/FRSTseg*/  2>&1 | tee -a  $LOG
 
 
-# Generating cell heatmaps in atlas space
-echo "========= Generating cell segmentation heatmaps in atlas space =======" 2>&1 | tee -a $LOG 
+echo "========= Generating cell segmentation heatmaps in downsampled image space =======" 2>&1 | tee -a $LOG 
 mkdir ${OUTPUTDIR}/heatmaps_atlasspace/
 mkdir ${OUTPUTDIR}/heatmaps_imagespace/
 #${INSTALL_PREFIX}/create_heatmap.sh ${CHANNEL640} ${DSFACTOR} ${OUTPUTDIR}/heatmaps_atlasspace/  ${OUTPUTDIR}/downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/FRST_seg/FRSTseg_*/  2>&1 | tee -a  $LOG
 ${INSTALL_PREFIX}/create_heatmap.sh ${CHANNEL640} ${DSFACTOR} ${OUTPUTDIR}/heatmaps_imagespace/  ${OUTPUTDIR}/downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/FRST_seg/FRSTseg_*/  2>&1 | tee -a  $LOG
 
-for file in `ls $OUTPUTDIR/heatmaps_imagespace/*.nii.gz`
-do 
-    M=`basename $file`
-    M=`remove_ext $M`
-    X=${OUTPUTDIR}/heatmaps_imagespace/${M}.tif         
-    ${INSTALL_PREFIX}/nii2tiff.sh ${file} ${X} float32 yes 2>&1 | tee -a  $LOG    
-done
 
-
+echo "========= Generating cell segmentation heatmaps in atlas space =======" 2>&1 | tee -a $LOG 
 for file in `ls $OUTPUTDIR/heatmaps_imagespace/*.nii.gz`
 do 
     M=`basename $file`
@@ -648,12 +654,26 @@ do
     ${INSTALL_PREFIX}/nii2tiff.sh ${X} ${Y} float32 yes 2>&1 | tee -a  $LOG
     pigz -vf -p $NUMCPU ${X} 2>&1 | tee -a  $LOG
 done
+
+
+echo "====================================================================" 2>&1 | tee -a $LOG 
+FSLOUTPUTTYPE=NIFTI_GZ
+for file in `ls $OUTPUTDIR/heatmaps_imagespace/*.nii.gz`
+do 
+    M=`basename $file`
+    M=`remove_ext $M`
+    echo fslmaths $file -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii $file 2>&1 | tee -a  $LOG    
+    fslmaths $file -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii $file
+    X=${OUTPUTDIR}/heatmaps_imagespace/${M}.tif         
+    ${INSTALL_PREFIX}/nii2tiff.sh ${file} ${X} float32 yes 2>&1 | tee -a  $LOG    
+done
+
 echo "====================================================================" 2>&1 | tee -a $LOG 
 
 ${INSTALL_PREFIX}/nii2tiff.sh ${OUTPUTDIR}/downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}.tif uint16 yes 2>&1 | tee -a  $LOG
 
 
-
+FSLOUTPUTTYPE=NIFTI
 # If mask exists, redo the csvs with the mask.
 if [ x"${EXCLUDE_MASK}" != "x" ];then
     echo "=============== Correcting CSV files and heatmaps with the exclusion mask ==============" 2>&1 | tee -a $LOG 
