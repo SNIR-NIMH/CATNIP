@@ -80,7 +80,7 @@ else
 fi
 START=$(date +%s)
 
-
+ANTS_RANDOM_SEED=1234
 echo "$reg -d $dim -r [ $f, $m ,1] --float -m mattes[  $f, $m , 1 , $bins, regular, $percentage ] -t translation[ 0.1 ] -c [ $its, 1.e-8, 20 ]  -s ${sigma}  -f ${ds} -l 1 -m mattes[  $f, $m , 1 , $bins, regular, $percentage ] -t rigid[ 0.1 ] -c [ $its, 1.e-8, 20 ]  -s $sigma -f $ds -l 1 -m mattes[  $f, $m , 1 , $bins, regular, $percentage ] -t affine[ 0.1 ] -c [ $its, 1.e-8, 20 ]  -s ${sigma}  -f ${ds} -l 1 -m mattes[  $f, $m , 0.5 , $bins ] -m cc[  $f, $m , 0.5 , 4 ] -t SyN[ .20, 3, 0 ]  -c [ $syn ]  -s ${sigma}  -f ${ds} -l 1 -u 1 -z 1 -o [ ${prefix} ] -v 1"
 # -w [ 0.01, 0.99 ]
 $reg -d $dim -r [ $f, $m ,1]  -m mattes[  $f, $m , 1 , $bins, regular, $percentage ] \
