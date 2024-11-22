@@ -41,7 +41,7 @@ Usage:
 ./CATNIP.sh  --cfos CHANNELFOS   --o OUTPUTDIR  --ob OB_FLAG  --udflip UPDOWN_FLIP_FLAG  \\
         --lrflip LR_FLIP_FLAG  --thr THRESHOLD  --dsfactor DSFACTOR  --cellradii RADII \\        
         --ncpu NUMCPU  --exclude_mask EXCLUSION_MASK_IMAGE  --bg_noise_param BG_NOISE_PARAM \\
-        --atlasversion v2  --mask_ovl_ratio  MASK_OVL_RATIO
+        --atlasversion v5  --mask_ovl_ratio  MASK_OVL_RATIO --slow
     
     Required arguments:
     
@@ -80,7 +80,7 @@ Usage:
     NUMCPU          : (Optional) Number of parallel processing cores to be used.
                       This must be less/equal to the total available number of 
                       cpus. Usually 8 or 12 is fine. Maximum required memory is
-                      also proportional to the number of processes. Default 8.
+                      also proportional to the number of processes. Default 12.
                       
     THRESHOLD       : (Optional) FRST segmentation thresholds. FRST output is a 
                       continuous valued image from 0-65000. Usually, a threshold 
@@ -92,9 +92,9 @@ Usage:
                       If not mentioned, default is 45000:5000:60000.                                              
                       
     EXCLUSION_MASK  : (Optional) A binary mask indicating bad regions/artifacts in the image. 
-                      ** 1) This must already be in the "atlas orientation", i.e. cerebellum 
-                      in bottom left side. See XX_FLIP_FLAG argument for the definition
-                      of the atlas orientation
+                      ** 1) This must already be in the "atlas orientation".
+                      See XX_FLIP_FLAG and --atlasversion argument for the definition
+                      of the atlas orientation.
                       ** 2) This must be in one of the following space, 
                       (a) Same dimension as the original image "after" proper orientation, 
                       i.e., this mask will "NOT" be reoriented based on the flip flags.
@@ -117,11 +117,11 @@ Usage:
                       
     ATLASVERSION    : (Optional) Choose between the following options
                       v1: uClear atlas, sagittal, single hemisphere
-                      v2: (Default) Clearmap2 atlas, sagittal, single hemisphere. 
+                      v2: Clearmap2 atlas, sagittal, single hemisphere. 
                       v3: v2 atlas but without cerebellum
                       v4: whole brain Clearmap2 atlas, axial, cerebellum front & 
                           brainstem back in depth
-                      v5: whole brain Clearmap2 atlas, axial, cerebellum front & 
+                      v5: (Default) whole brain Clearmap2 atlas, axial, cerebellum front & 
                           brainstem back in depth, with new colormap where left and 
                           right hemisphere labels have alternating numbers.
                       v6: v5 atlas but excludes brainstem and cerebellum
@@ -134,12 +134,21 @@ Usage:
                       less than half of its total volume. So small overlap with the 
                       exclusion mask is ignored. Default is 0.25.
                       
+    SLOW              (Optional) Adding a --slow argument will make the ANTs registration
+                      use a fixed seed and a single processor, as opposed to default
+                      NUMCPU parallel processes. This also makes the registration
+                      deterministic and reproducible at the cost of speed. Usually 
+                      the registration takes 2-4 hours with 12 cpus. It will take 
+                      approx 12 times that when this argument is added. This argument 
+                      only affects the ANTs registration, the rest of the pipeline 
+                      always uses NUMCPU parallel processes. 
+                      
     
     Example: 
     ./CATNIP.sh --cfos /home/user/input/640/ --o /home/user/output  \\
         --ob yes --udflip no --lrflip yes --cellradii 3,4,5,6 --thr 5000:5000:60000  \\
          --ncpu 12 --dsfactor 9x9x7  --exclude_mask  /home/user/artifact_mask_9x9x7.nii.gz \\
-         --atlasversion v2 --bg_noise_param 50,1.05
+         --atlasversion v5 --bg_noise_param 50,1.05
     
     Required arguments:
     /home/user/input/640/ --> 2D tiff images of the FOS channel    
@@ -191,7 +200,7 @@ check_modules fslmaths
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -l "cfos:,ncpu:,o:,ob:,udflip:,lrflip:,thr:,ometiff:,dsfactor:,cellradii:,exclude_mask:,atlasversion:,bg_noise_param:,mask_ovl_ratio:,help" -o "h" -- "$@")
+options=$(getopt -l "cfos:,ncpu:,o:,ob:,udflip:,lrflip:,thr:,ometiff:,dsfactor:,cellradii:,exclude_mask:,atlasversion:,bg_noise_param:,mask_ovl_ratio:,slow,help" -o "h" -- "$@")
 
 CHANNEL640=
 OUTPUTDIR=
@@ -205,10 +214,11 @@ EXCLUDE_MASK=
 DSFACTOR=
 CELLRADII=
 BG_NOISE_PARAM=50,1.05
-ATLASVERSION=v2
+ATLASVERSION=v5
 MASKOVLRATIO=0.25
 WHOLEBRAIN=false  # If wholebrain flag is true, ignore hemisphere masking
-
+REPRODUCIBLE=false  # ANTS with fixed seed and numcpu=1
+    
 # set --:
 # If no arguments follow this option, then the positional parameters are unset. Otherwise, the positional parameters 
 # are set to the arguments, even if some of them begin with a ‘-’.
@@ -276,6 +286,9 @@ case $1 in
 --mask_ovl_ratio) 
     shift
     export MASKOVLRATIO=$1    
+    ;; 
+--slow)     
+    export REPRODUCIBLE=true
     ;; 
 --)
     shift
@@ -351,8 +364,8 @@ fi
 
 if [ x"${THRESHOLD}" == "x" ];then    
     echo "WARNING: FRST thresholds are not mentioned with --thr argument. "
-    echo "WARNING: Using default 5000:5000:60000."
-    THRESHOLD="5000:5000:60000"    
+    echo "WARNING: Using default 45000:5000:60000."
+    THRESHOLD="45000:5000:60000"    
 fi
 
 if  [ "${ATLASVERSION}" != "v1" ] && [ "${ATLASVERSION}" != "v2" ] && [ "${ATLASVERSION}" != "v3" ] && [ "${ATLASVERSION}" != "v4" ] && [ "${ATLASVERSION}" != "v5" ] && [ "${ATLASVERSION}" != "v6" ] && [ "${ATLASVERSION}" != "v7" ];then
@@ -389,11 +402,11 @@ fi
 
 #=============================================================================
 
-#RAND=`echo $RANDOM`
-#RAND=$((RAND % 180))  # This is to disable race conditions for multiple matlab compiler calls.
+RAND=`echo $RANDOM`
+RAND=$((RAND % 180))  # This is to disable race conditions for multiple matlab compiler calls.
                       # This is specifically useful for HPC clusters while running lots of 
                       # codes simultaneously.
-#sleep $RAND
+sleep $RAND
 ID=`basename $CHANNEL640`
 ID="$ID"_`date '+%Y-%m-%d_%H-%M-%S'`
 echo "Unique ID is $ID"
@@ -502,7 +515,8 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
     echo "Exclusion mask                : ${EXCLUDE_MASK}"  2>&1 | tee -a  $LOG
 fi
 echo "Cell radii (in pixels)        : $CELLRADII  "     2>&1 | tee -a  $LOG
-echo "Mask overlap ratio            : $MASKOVLRATIO  "     2>&1 | tee -a  $LOG
+echo "Mask overlap ratio            : $MASKOVLRATIO  "  2>&1 | tee -a  $LOG
+echo "ANTS with fixed seed          : $REPRODUCIBLE "  2>&1 | tee -a  $LOG
 
 H=`${INSTALL_PREFIX}/image_info.sh $CHANNEL640 H`
 W=`${INSTALL_PREFIX}/image_info.sh $CHANNEL640 W`
@@ -558,8 +572,14 @@ ${INSTALL_PREFIX}/fix_header.sh $OUTPUTDIR/downsampled_${DSFACTOR}.nii  $OUTPUTD
 
 echo "================ Atlas registration with ANTs =================" 2>&1 | tee -a $LOG 
 ${INSTALL_PREFIX}/image_clamp.sh $OUTPUTDIR/downsampled_${DSFACTOR}.nii  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii 99 true 2>&1 | tee -a  $LOG
-echo ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
-${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
+ANTS_RANDOM_SEED=1234
+if [ "${REPRODUCIBLE}" == "false" ];then
+    echo ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
+    ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
+else
+    echo ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii 1   4x2x1  2>&1 | tee  -a $LOG
+    ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii 1   4x2x1  2>&1 | tee  -a $LOG
+fi
 
 echo "================== Transforming labels =========================" 2>&1 | tee -a $LOG 
 # Apply the transform to the label
@@ -642,6 +662,11 @@ ${INSTALL_PREFIX}/create_heatmap.sh ${CHANNEL640} ${DSFACTOR} ${OUTPUTDIR}/heatm
 
 
 echo "========= Generating cell segmentation heatmaps in atlas space =======" 2>&1 | tee -a $LOG 
+
+# Create a brainmask in atlasspace, to be used by heatmaps_atlasspace to differentiate
+# between zero values and background
+antsApplyTransforms -d 3 -i ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii -r  ${ATLASIMAGE} -o ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask_atlasspace.nii -n NearestNeighbor -f 0 -v 1 -t [ ${OUTPUTDIR}/atlasimage_reg1InverseWarp.nii.gz ] -t [ ${OUTPUTDIR}/atlasimage_reg0GenericAffine.mat,1 ] --float 2>&1 | tee -a  $LOG
+fslmaths ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask_atlasspace.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask_atlasspace.nii -odt char
 for file in `ls $OUTPUTDIR/heatmaps_imagespace/*.nii.gz`
 do 
     M=`basename $file`
