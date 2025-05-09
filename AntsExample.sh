@@ -90,7 +90,7 @@ $reg -d $dim -r [ $f, $m ,1]  -m mattes[  $f, $m , 1 , $bins, regular, $percenta
                         -m mattes[  $f, $m , 1 , $bins, regular, $percentage ] \
                          -t affine[ 0.1 ] -c [ $its, 1.e-8, 20 ] -s ${sigma} -f ${ds} -l 1 \
                         -m mattes[  $f, $m , 0.5 , $bins ] -m cc[  $f, $m , 0.5 , 4 ] -t SyN[ .20, 3, 0 ] \
-                         -c [ $syn ] -s ${sigma} -f ${ds} -l 1 -u 1 -z 1 \
+                         -c [ $syn ] -s ${sigma} -f ${ds} -u 1 -z 1 \
                         -o [ ${prefix} ] -v 1 --float
 
 
