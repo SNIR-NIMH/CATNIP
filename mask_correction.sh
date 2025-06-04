@@ -8,10 +8,13 @@ if [ $# -lt "5" ]; then
   echo "Usage:
   ./mask_correction.sh  ATLASLABEL_DEF   MASK_DS   INPUT_CSV_DIR   OUTPUT_CSV_DIR    MASK_OVL_THRESH
  
- ATLASLABEL_DEF        Atlas label image, registered to the downsampled subject image (a .nii or .nii.gz file)
- MASK_DS               Exclusion/artifact mask (i.e. exclude pixels >0) downsampled to the target image space (not the atlas space), a .nii or .nii.gz file
- INPUT_CSV_DIR         Input CSV directory, usually 640_FRST_seg/
- OUTPUT_CSV_DIR        Output CSV directory, where corrected csvs will be written.
+ ATLASLABEL_DEF        Registered atlas label image, registered to the downsampled 
+                       to the subject image space
+ MASK_DS               Exclusion/artifact mask (i.e. exclude pixels >0) downsampled 
+                       to the subject image space 
+ INPUT_CSV_DIR         Input CSV directory, usually FRST_seg/
+ OUTPUT_CSV_DIR        Output CSV directory, usually FRST_seg_corrected, where 
+                       corrected csvs are written.
  MASK_OVL_THRESH       A mask volume overlap threshold (between 0 and 1) for 
                        exclusion mask. if the overlab of a label with the mask
                        is more than this, then that label is excluded.
