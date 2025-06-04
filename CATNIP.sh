@@ -39,7 +39,7 @@ cat << EOF
 Usage:
 
 ./CATNIP.sh  --cfos CHANNELFOS   --o OUTPUTDIR  --ob OB_FLAG  --udflip UPDOWN_FLIP_FLAG  \\
-        --lrflip LR_FLIP_FLAG  --thr THRESHOLD  --dsfactor DSFACTOR  --cellradii RADII \\        
+        --lrflip LR_FLIP_FLAG  --thr THRESHOLD  --dsfactor DSFACTOR  --cellradii RADII  --cellsizepx CELLSIZEPX \\        
         --ncpu NUMCPU  --exclude_mask EXCLUSION_MASK_IMAGE  --bg_noise_param BG_NOISE_PARAM \\
         --atlasversion v5  --mask_ovl_ratio  MASK_OVL_RATIO --slow
     
@@ -75,7 +75,11 @@ Usage:
                       separated string.
                       
     Optional arguments:
-        
+    CELLSIZEPX    : (Optional) A comma separated pair of cell size range in pixels. 
+                       Default 9,900. The numbers indicate the minimum and maximum 
+                       sizes of a cell are 9 and 900 pixels. After thresholding, 
+                       if an object is bigger than the higher limit, a Watershed algorithm 
+                       is run to split it. Anything smaller or bigger is not counted. 
                       
     NUMCPU          : (Optional) Number of parallel processing cores to be used.
                       This must be less/equal to the total available number of 
@@ -148,7 +152,7 @@ Usage:
     ./CATNIP.sh --cfos /home/user/input/640/ --o /home/user/output  \\
         --ob yes --udflip no --lrflip yes --cellradii 3,4,5,6 --thr 5000:5000:60000  \\
          --ncpu 12 --dsfactor 9x9x7  --exclude_mask  /home/user/artifact_mask_9x9x7.nii.gz \\
-         --atlasversion v5 --bg_noise_param 50,1.05
+         --atlasversion v5 --bg_noise_param 50,1.05 --cellsizepx 9,800
     
     Required arguments:
     /home/user/input/640/ --> 2D tiff images of the FOS channel    
@@ -159,6 +163,7 @@ Usage:
                               right side instead of bottom left side (--lrflip)
     9x9x7                 --> Dowsampling factor for registration   
     3,4,5,6               --> Cell radii is *pixels*  
+    9,800                 --> A cell must have volume between 9 and 800 voxels
     
       
     Optional arguments:
@@ -200,7 +205,7 @@ check_modules fslmaths
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -l "cfos:,ncpu:,o:,ob:,udflip:,lrflip:,thr:,ometiff:,dsfactor:,cellradii:,exclude_mask:,atlasversion:,bg_noise_param:,mask_ovl_ratio:,slow,help" -o "h" -- "$@")
+options=$(getopt -l "cfos:,ncpu:,o:,ob:,udflip:,lrflip:,thr:,ometiff:,dsfactor:,cellradii:,exclude_mask:,atlasversion:,bg_noise_param:,mask_ovl_ratio:,cellsizepx:slow,help" -o "h" -- "$@")
 
 CHANNEL640=
 OUTPUTDIR=
@@ -215,6 +220,7 @@ DSFACTOR=
 CELLRADII=
 BG_NOISE_PARAM=50,1.05
 ATLASVERSION=v5
+CELLSIZEINPX=9,900
 MASKOVLRATIO=0.25
 WHOLEBRAIN=false  # If wholebrain flag is true, ignore hemisphere masking
 REPRODUCIBLE=false  # ANTS with fixed seed and numcpu=1
@@ -259,9 +265,9 @@ case $1 in
     shift
     export THRESHOLD=$1
     ;;
---ometiff) 
+--cellsizepx) 
     shift
-    export OMETIFF=$1
+    export CELLSIZEINPX=$1
     ;;
 --dsfactor) 
     shift
@@ -368,8 +374,10 @@ if [ x"${THRESHOLD}" == "x" ];then
     THRESHOLD="45000:5000:60000"    
 fi
 
-if  [ "${ATLASVERSION}" != "v1" ] && [ "${ATLASVERSION}" != "v2" ] && [ "${ATLASVERSION}" != "v3" ] && [ "${ATLASVERSION}" != "v4" ] && [ "${ATLASVERSION}" != "v5" ] && [ "${ATLASVERSION}" != "v6" ] && [ "${ATLASVERSION}" != "v7" ];then
-    echo "ERROR: ATLASVERSION flag (--atlasversion XX) must be v1/v2/v3/v4/v5/v6/v7. You entered $ATLASVERSION"
+if  [ "${ATLASVERSION}" != "v1" ] && [ "${ATLASVERSION}" != "v2" ] && [ "${ATLASVERSION}" != "v3" ] && \
+ [ "${ATLASVERSION}" != "v4" ] && [ "${ATLASVERSION}" != "v5" ] && [ "${ATLASVERSION}" != "v6" ]  && \
+  [ "${ATLASVERSION}" != "v7" ] && [ "${ATLASVERSION}" != "v8" ];then
+    echo "ERROR: ATLASVERSION flag (--atlasversion XX) must be v1,v2,..,v8. You entered $ATLASVERSION"
     exit 1            
 fi
 
@@ -406,7 +414,7 @@ RAND=`echo $RANDOM`
 RAND=$((RAND % 180))  # This is to disable race conditions for multiple matlab compiler calls.
                       # This is specifically useful for HPC clusters while running lots of 
                       # codes simultaneously.
-sleep $RAND
+#sleep $RAND
 ID=`basename $CHANNEL640`
 ID="$ID"_`date '+%Y-%m-%d_%H-%M-%S'`
 echo "Unique ID is $ID"
@@ -423,7 +431,7 @@ LOG=$OUTPUTDIR/${ID}.log.txt
 export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=$NUMCPU
 
 
-if [ "$ATLASVERSION" == "v1" ];then
+if [ "$ATLASVERSION" == "v1" ] || [ "$ATLASVERSION" == "v8" ];then
     if [ "$OBFLAG" == "yes" ];then    
         ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_withOB_RHplus49_N4.nii.gz
         ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/annotation_atlasImage.Iteration.002_-x-z_renormalized_withOB.nii.gz
@@ -516,6 +524,7 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
 fi
 echo "Cell radii (in pixels)        : $CELLRADII  "     2>&1 | tee -a  $LOG
 echo "Mask overlap ratio            : $MASKOVLRATIO  "  2>&1 | tee -a  $LOG
+echo "Cell size range (in pixels)   : $CELLSIZEINPX  "     2>&1 | tee -a  $LOG
 echo "ANTS with fixed seed          : $REPRODUCIBLE "  2>&1 | tee -a  $LOG
 
 H=`${INSTALL_PREFIX}/image_info.sh $CHANNEL640 H`
@@ -651,15 +660,16 @@ ${INSTALL_PREFIX}/ApplyFRSTseg.sh $OUTPUTDIR/FRST/ $OUTPUTDIR/FRST_seg/ "${THRES
 
 
 echo "============== Generating stats on the cell counts =================" 2>&1 | tee -a $LOG 
-${INSTALL_PREFIX}/Generate_Stats.sh $OUTPUTDIR/FRST_seg/ ${INSTALL_PREFIX}/atlas_${ATLASVERSION}/atlas_info.txt   $OUTPUTDIR/atlaslabel_def_brain.nii $DSFACTOR $OUTPUTDIR/atlaslabel_def_origspace_masked/  $CELLRADII $OUTPUTDIR/FRST_seg/FRSTseg*/  2>&1 | tee -a  $LOG
+${INSTALL_PREFIX}/Generate_Stats.sh $OUTPUTDIR/FRST_seg/ ${INSTALL_PREFIX}/atlas_${ATLASVERSION}/atlas_info.txt   $OUTPUTDIR/atlaslabel_def_brain.nii $DSFACTOR $OUTPUTDIR/atlaslabel_def_origspace_masked/  $CELLSIZEINPX $OUTPUTDIR/FRST_seg/FRSTseg*/  2>&1 | tee -a  $LOG
+
+echo "============== Writing corrected FRST segmentations  with cell volume =================" 2>&1 | tee -a $LOG 
+${INSTALL_PREFIX}/FRSTsegcorrect.sh ${OUTPUTDIR}/atlaslabel_def_origspace  ${OUTPUTDIR}/FRST_seg/cellvolumes/ "${THRESHOLD}" ${OUTPUTDIR}/FRST_seg/  $NUMCPU 2>&1 | tee -a  $LOG
 
 
 echo "========= Generating cell segmentation heatmaps in downsampled image space =======" 2>&1 | tee -a $LOG 
 mkdir ${OUTPUTDIR}/heatmaps_atlasspace/
 mkdir ${OUTPUTDIR}/heatmaps_imagespace/
-#${INSTALL_PREFIX}/create_heatmap.sh ${CHANNEL640} ${DSFACTOR} ${OUTPUTDIR}/heatmaps_atlasspace/  ${OUTPUTDIR}/downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/FRST_seg/FRSTseg_*/  2>&1 | tee -a  $LOG
-${INSTALL_PREFIX}/create_heatmap.sh ${CHANNEL640} ${DSFACTOR} ${OUTPUTDIR}/heatmaps_imagespace/  ${OUTPUTDIR}/downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/FRST_seg/FRSTseg_*/  2>&1 | tee -a  $LOG
-
+${INSTALL_PREFIX}/create_heatmap.sh ${CHANNEL640} ${DSFACTOR} ${OUTPUTDIR}/heatmaps_imagespace/  ${OUTPUTDIR}/downsampled_${DSFACTOR}.nii $NUMCPU ${OUTPUTDIR}/FRST_seg/cellvolumes/*.mat  2>&1 | tee -a  $LOG
 
 echo "========= Generating cell segmentation heatmaps in atlas space =======" 2>&1 | tee -a $LOG 
 
