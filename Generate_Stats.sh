@@ -6,7 +6,8 @@ exe_dir=`dirname ${exe_dir}`
 
 if [ $# -lt "7" ]; then
   echo "Usage:
-  ./Generate_Stats.sh CsvDir Label_info Segmentation Cell_Images
+  ./Generate_Stats.sh CsvDir   Label_info_Txt  Segmentation_ds  dsfactor 
+                             Segmentation_Origspace  CellSizeRange  Cell_Images
 
 CsvDir              Output directory where CSV files are written, each csv
                     contains info about each cell segmentation count
@@ -22,12 +23,11 @@ DSFACTOR            Same downsampling factor used to generate the downsampled
 Segmentation_origspace  Discreet registered label image
                     (atlaslabel_def_origspace) on the original space. The cells
                     are counted on this space.
-CellRadii           Cell radii used to compute FRST. This is used when the
-                    image is too. In that case, the X-Y axis is downsampled
-                    by the minimum of the cell radii without any loss of cell
-                    count. This must be a comma separated.
+CellSizeinPx        Cell size range in pixels, a 2x1 comma separated pair
+                    denoting min and max cell size. Default 9,900. 
+                    **If the max cell size is larger than 65535, there might be problem.**
 Cell_images         Multiple cell segmentation images, binary, output of
-                    ApplyFRSTseg script, i.e. 640_FRST_seg folder content
+                    ApplyFRSTseg script, i.e. FRST_seg folder content
 "
 exit 1
 fi
