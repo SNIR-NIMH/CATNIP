@@ -4,14 +4,17 @@ exe_dir=`dirname "$0"`
 
 if [ $# -lt "5" ]; then
   echo "Usage:
-  ./FlipImages.sh   INPUTDIR  OUTPUTDIR   UDFLIP   LRFLIP  ZFLIP  NUMCPU
+  ./FlipImages.sh   INPUTDIR  OUTPUTDIR   UDFLIP   LRFLIP  ZFLIP  NUMCPU  DSFACTOR
  
  INPUTDIR          Input directory with tiff images or 3D tif file
  OUTPUTDIR         Output directory where tiff images will be written or a 3D tif file
  UDFLIP            A yes/no flag if the image is to be flipped up-down
  LRFLIP            A yes/no flag if the image is to be flipped left-right
  ZFLIP             A yes/no flag if the image depth (z axis) is to be flipped
- NUMCPU            Number of parallel processes to use.
+ NUMCPU            (Optional) Number of parallel processes to be used, default 8. 
+                   Used only if output is a folder
+ DSFACTOR          (Optional) A downsampling factor to downsample images in
+                   X-Y only dimensions only. Default 1, i.e. no downsampling.
   "
   exit 1
 fi
