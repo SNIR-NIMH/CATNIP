@@ -197,7 +197,7 @@ check_modules antsApplyTransforms
 check_modules ConvertImage    
 check_modules N4BiasFieldCorrection
 check_modules pigz
-check_modules tiffinfo
+#check_modules tiffinfo
 check_modules ImageMath
 check_modules fslmaths
 
@@ -205,7 +205,7 @@ check_modules fslmaths
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -l "cfos:,ncpu:,o:,ob:,udflip:,lrflip:,thr:,ometiff:,dsfactor:,cellradii:,exclude_mask:,atlasversion:,bg_noise_param:,mask_ovl_ratio:,cellsizepx:slow,help" -o "h" -- "$@")
+options=$(getopt -l "cfos:,ncpu:,o:,ob:,udflip:,lrflip:,thr:,ometiff:,dsfactor:,cellradii:,exclude_mask:,atlasversion:,bg_noise_param:,mask_ovl_ratio:,cellsizepx:,slow,help" -o "h" -- "$@")
 
 CHANNEL640=
 OUTPUTDIR=
