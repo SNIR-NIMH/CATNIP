@@ -72,7 +72,7 @@ percentage=0.35
 #shrinkfactor=18x12x6
 #shrinkfactor=4x2x1
 sigma=1x0.5x0.5vox  # in voxels
-verbose=0
+verbose=1
 bins=64
 
 if [ -f "$prefix".nii ];then

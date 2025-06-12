@@ -7,7 +7,7 @@ INSTALL_PREFIX=`dirname $INSTALL_PREFIX`
 
 if [ $# -lt "6" ];then
     echo "Usage:
-    ./quick_QA_downsample_and_register.sh  INPUTDIR OUTPUTDIR DSFACTOR  isOB  NOISE_PARAM
+    ./quick_QA_downsample_and_register.sh  INPUTDIR  OUTPUTDIR  DSFACTOR  isOB  NOISE_PARAM  ATLASVERSION  NUMCPU
     
     INPUTDIR        Input directory containing correctly oriented images. They will 
                     not be reoriented further.
@@ -17,6 +17,7 @@ if [ $# -lt "6" ];then
     isOB            Either yes or no.
     NOISE_PARAM     Noise parameter in percentile,stepsize format, used in CATNIP.
     ATLASVERSION    Atlas version (e.g. v2 or v3) used in CATNIP script
+    NUMCPU          (Optional) Number of CPUs to use for registration. Default 12.
     "
     exit 1
 fi
@@ -27,7 +28,12 @@ DSFACTOR=$3
 OBFLAG=$4
 NOISE=$5
 ATLASVERSION=$6
-
+NUMCPU=$7
+if [ x"$NUMCPU" == "x" ];then
+    NUMCPU=12
+fi
+    
+ID=`basename $INPUTDIR`
 mkdir -p $OUTPUTDIR
 a=`echo $NOISE |cut -d ',' -f1`
 b=`echo $NOISE |cut -d ',' -f2`
@@ -101,19 +107,20 @@ ATLASHEMIMASK=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_hemisphere
 
 
 
-IMG=$OUTPUTDIR/downsampled_${DSFACTOR}.nii
-IMG2=$OUTPUTDIR/downsampled_${DSFACTOR}_denoised.nii
+IMG=$OUTPUTDIR/${ID}_downsampled_${DSFACTOR}.nii
+IMG2=$OUTPUTDIR/${ID}_downsampled_${DSFACTOR}_denoised.nii
 ${INSTALL_PREFIX}/Downsample3D.sh $INPUTDIR $IMG $DSFACTOR $ATLASIMAGE
 
 ${INSTALL_PREFIX}/fix_header.sh $IMG $IMG 25x25x25
 ${INSTALL_PREFIX}/remove_background_noise.sh $IMG $a $IMG2 $b
 ${INSTALL_PREFIX}/image_clamp.sh $IMG2 $IMG2 99 true
 
-REG=$OUTPUTDIR/atlasimage_affine_${DSFACTOR}.nii
+REG=$OUTPUTDIR/${ID}_atlasimage_affine_${DSFACTOR}.nii
 if [ -f "$REG" ];then
     echo "WARNING: Affine registration ($REG) exists. I will delete it now."    
     rm -vf $REG
 fi
-echo ${INSTALL_PREFIX}/antsaffine.sh $IMG2 $ATLASIMAGE  $REG no 12 4x2x1
-${INSTALL_PREFIX}/antsaffine.sh $IMG2 $ATLASIMAGE  $REG no 12 4x2x1
-antsApplyTransforms -d 3 -i $ATLASHEMIMASK -r $OUTPUTDIR/downsampled_${DSFACTOR}_denoised.nii -o $OUTPUTDIR/hemispheremask_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1  -t $OUTPUTDIR/atlasimage_affine_${DSFACTOR}0GenericAffine.mat   
+echo ${INSTALL_PREFIX}/antsaffine.sh $IMG2 $ATLASIMAGE  $REG no $NUMCPU 4x2x1
+${INSTALL_PREFIX}/antsaffine.sh $IMG2 $ATLASIMAGE  $REG no $NUMCPU  4x2x1
+antsApplyTransforms -d 3 -i $ATLASHEMIMASK -r $IMG2 -o $OUTPUTDIR/${ID}_hemispheremask_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1  -t $OUTPUTDIR/${ID}_atlasimage_affine_${DSFACTOR}0GenericAffine.mat   
+antsApplyTransforms -d 3 -i $ATLASLABEL -r $IMG2 -o $OUTPUTDIR/${ID}_atlaslabel_affine_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1  -t $OUTPUTDIR/${ID}_atlasimage_affine_${DSFACTOR}0GenericAffine.mat  
