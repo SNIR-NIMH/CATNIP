@@ -175,7 +175,7 @@ Usage:
                               downsampled image.                                
         
     This code is meant to run on Biowulf. If you want to run this on your local 
-    computer, please install ANTs, FSL (add them to \$PATH), and Matlab MCR v912 (2022a).
+    computer, please install ANTs (add the bin folder to \$PATH), and Matlab MCR v912 (2022a).
     Then change the MCRROOT variables in the associated scripts.
 EOF
 # EOF is found above and hence cat command stops reading. 
@@ -190,7 +190,7 @@ fi
 
 # Biowulf specific commands, for local machine, comment the following lines
 #module load ANTs/2.2.0
-#module load fsl
+
 
 check_modules antsRegistration
 check_modules antsApplyTransforms
@@ -199,7 +199,7 @@ check_modules N4BiasFieldCorrection
 check_modules pigz
 #check_modules tiffinfo
 check_modules ImageMath
-check_modules fslmaths
+#check_modules fslmaths
 
 # -o is for short options like -v
 # -l is for long options with double dash like --version
@@ -304,7 +304,7 @@ shift
 done
 
 
-FSLOUTPUTTYPE=NIFTI
+#FSLOUTPUTTYPE=NIFTI
 
 # ========================= Set up paths and check for errors =========================
 
@@ -613,12 +613,16 @@ if [ "$WHOLEBRAIN" == "false" ];then
     echo "antsApplyTransforms -d 3 -i $ATLASHEMIMASK -r $OUTPUTDIR/downsampled_${DSFACTOR}.nii -o $OUTPUTDIR/hemispheremask_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1 -t $OUTPUTDIR/atlasimage_reg1Warp.nii.gz -t $OUTPUTDIR/atlasimage_reg0GenericAffine.mat" 2>&1 | tee -a  $LOG
     antsApplyTransforms -d 3 -i $ATLASHEMIMASK -r $OUTPUTDIR/downsampled_${DSFACTOR}.nii -o $OUTPUTDIR/hemispheremask_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1 -t $OUTPUTDIR/atlasimage_reg1Warp.nii.gz -t $OUTPUTDIR/atlasimage_reg0GenericAffine.mat   2>&1 | tee -a  $LOG
 
-    echo "fslmaths ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -odt char" 2>&1 | tee -a  $LOG
-    fslmaths ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -odt char
+    #echo "fslmaths ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -odt char"  | tee -a  $LOG
+    #fslmaths ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii -odt char
+    echo "ImageMath 3 ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii m  ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii" | tee -a $LOG
+    ImageMath 3 ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii m  ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii
 
     # Mask the atlaslabel_def image for Generate_Stats code
-    echo fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii 2>&1 | tee -a  $LOG
-    fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii
+    #echo fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii 2>&1 | tee -a  $LOG
+    #fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii
+    echo "ImageMath 3 ${OUTPUTDIR}/atlaslabel_def_brain.nii m ${OUTPUTDIR}/atlaslabel_def.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii " |tee -a $LOG
+    ImageMath 3 ${OUTPUTDIR}/atlaslabel_def_brain.nii m ${OUTPUTDIR}/atlaslabel_def.nii ${OUTPUTDIR}/hemispheremask_${DSFACTOR}.nii 
 
     echo "====================================================================" 2>&1 | tee -a $LOG 
     ${INSTALL_PREFIX}/nii2tiff.sh $OUTPUTDIR/hemispheremask_${DSFACTOR}.nii $OUTPUTDIR/hemispheremask_${DSFACTOR}.tif uint16 yes 2>&1 | tee -a  $LOG
@@ -632,10 +636,15 @@ if [ "$WHOLEBRAIN" == "false" ];then
 else
     #ln -vs ${OUTPUTDIR}/atlaslabel_def.nii ${OUTPUTDIR}/atlaslabel_def_brain.nii   2>&1 | tee -a $LOG  
     #ln -vs ${OUTPUTDIR}/atlaslabel_def_origspace/  ${OUTPUTDIR}/atlaslabel_def_origspace_masked   2>&1 | tee -a $LOG  # not a / at the end of the "masked"
-    echo fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii
-    fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii
-    echo fslmaths ${OUTPUTDIR}/atlasimage_reg.nii   -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlasimage_reg_brain.nii
-    fslmaths ${OUTPUTDIR}/atlasimage_reg.nii   -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlasimage_reg_brain.nii
+    #echo fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii |tee -a $LOG
+    #fslmaths ${OUTPUTDIR}/atlaslabel_def.nii  -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlaslabel_def_brain.nii
+    echo "ImageMath 3  ${OUTPUTDIR}/atlaslabel_def_brain.nii m  ${OUTPUTDIR}/atlaslabel_def.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii " |tee -a $LOG
+    ImageMath 3  ${OUTPUTDIR}/atlaslabel_def_brain.nii m  ${OUTPUTDIR}/atlaslabel_def.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii
+    
+    #echo fslmaths ${OUTPUTDIR}/atlasimage_reg.nii   -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlasimage_reg_brain.nii|tee -a $LOG
+    #fslmaths ${OUTPUTDIR}/atlasimage_reg.nii   -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii  ${OUTPUTDIR}/atlasimage_reg_brain.nii
+    echo "ImageMath 3 ${OUTPUTDIR}/atlasimage_reg_brain.nii m ${OUTPUTDIR}/atlasimage_reg.nii  ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii" |tee -a $LOG
+    ImageMath 3 ${OUTPUTDIR}/atlasimage_reg_brain.nii m ${OUTPUTDIR}/atlasimage_reg.nii  ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii
     
     
     ${INSTALL_PREFIX}/nii2tiff.sh ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii $OUTPUTDIR/hemispheremask_${DSFACTOR}.tif uint16 yes 2>&1 | tee -a  $LOG
@@ -676,7 +685,8 @@ echo "========= Generating cell segmentation heatmaps in atlas space =======" 2>
 # Create a brainmask in atlasspace, to be used by heatmaps_atlasspace to differentiate
 # between zero values and background
 antsApplyTransforms -d 3 -i ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii -r  ${ATLASIMAGE} -o ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask_atlasspace.nii -n NearestNeighbor -f 0 -v 1 -t [ ${OUTPUTDIR}/atlasimage_reg1InverseWarp.nii.gz ] -t [ ${OUTPUTDIR}/atlasimage_reg0GenericAffine.mat,1 ] --float 2>&1 | tee -a  $LOG
-fslmaths ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask_atlasspace.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask_atlasspace.nii -odt char
+#fslmaths ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask_atlasspace.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask_atlasspace.nii -odt char
+
 for file in `ls $OUTPUTDIR/heatmaps_imagespace/*.nii.gz`
 do 
     M=`basename $file`
@@ -692,13 +702,17 @@ done
 
 
 echo "====================================================================" 2>&1 | tee -a $LOG 
-FSLOUTPUTTYPE=NIFTI_GZ
+#FSLOUTPUTTYPE=NIFTI_GZ
 for file in `ls $OUTPUTDIR/heatmaps_imagespace/*.nii.gz`
 do 
     M=`basename $file`
-    M=`remove_ext $M`
-    echo fslmaths $file -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii $file 2>&1 | tee -a  $LOG    
-    fslmaths $file -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii $file
+    #M=`remove_ext $M`
+    M=${M%.*} # remove the nii.gz
+    M=${M%.*}
+    #echo fslmaths $file -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii $file 2>&1 | tee -a  $LOG    
+    #fslmaths $file -mas ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii $file
+    echo "ImageMath 3 $file m $file ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii" |tee -a $LOG
+    ImageMath 3 $file m $file ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii
     X=${OUTPUTDIR}/heatmaps_imagespace/${M}.tif         
     ${INSTALL_PREFIX}/nii2tiff.sh ${file} ${X} float32 yes 2>&1 | tee -a  $LOG    
 done
@@ -708,7 +722,7 @@ echo "====================================================================" 2>&1
 ${INSTALL_PREFIX}/nii2tiff.sh ${OUTPUTDIR}/downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/downsampled_${DSFACTOR}.tif uint16 yes 2>&1 | tee -a  $LOG
 
 
-FSLOUTPUTTYPE=NIFTI
+#FSLOUTPUTTYPE=NIFTI
 # If mask exists, redo the csvs with the mask.
 if [ x"${EXCLUDE_MASK}" != "x" ];then
     echo "=============== Correcting CSV files and heatmaps with the exclusion mask ==============" 2>&1 | tee -a $LOG 
@@ -721,8 +735,11 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
     fi
     # Extra binarization is needed because sometimes the exclusion mask is 0,255 instead of 0,1
     ${INSTALL_PREFIX}/fix_header.sh $OUTPUTDIR/exclusion_mask_downsampled_${DSFACTOR}.nii  $OUTPUTDIR/exclusion_mask_downsampled_${DSFACTOR}.nii  25x25x25  2>&1 | tee -a  $LOG # Fix header, for the time being, hardcoded
-    echo fslmaths ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -bin ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -odt float 2>&1 | tee -a  $LOG
-    fslmaths ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -bin ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -odt float
+    #echo fslmaths ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -bin ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -odt float | tee -a  $LOG
+    #fslmaths ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -bin ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -odt float
+    ${INSTALL_PREFIX}/binarize.sh  ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii 2>&1 | tee -a  $LOG 
+    ConvertImage 3 ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii  ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii 0
+    
     
     ${INSTALL_PREFIX}/mask_correction.sh  ${OUTPUTDIR}/atlaslabel_def.nii  ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${OUTPUTDIR}/FRST_seg/ ${OUTPUTDIR}/FRST_seg_corrected/ ${MASKOVLRATIO} 2>&1 | tee -a $LOG 
     
@@ -732,18 +749,25 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
     echo antsApplyTransforms -d 3 -i ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -r ${ATLASIMAGE} -o ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -n NearestNeighbor -f 0 -v 1 -t [ ${OUTPUTDIR}/atlasimage_reg1InverseWarp.nii.gz ] -t [ ${OUTPUTDIR}/atlasimage_reg0GenericAffine.mat,1 ] --float     2>&1 | tee -a  $LOG
     antsApplyTransforms -d 3 -i ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii -r ${ATLASIMAGE} -o ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -n NearestNeighbor -f 0 -v 1 -t [ ${OUTPUTDIR}/atlasimage_reg1InverseWarp.nii.gz ] -t [ ${OUTPUTDIR}/atlasimage_reg0GenericAffine.mat,1 ] --float    
     
-    echo fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -sub 1 ${OUTPUTDIR}/exclusion_mask_atlasspace.nii  2>&1 | tee -a  $LOG
-    fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -sub 1 ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
-    echo fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -abs ${OUTPUTDIR}/exclusion_mask_atlasspace.nii 2>&1 | tee -a  $LOG
-    fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -abs ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
+    
+    # Invert mask, remove FSL dependency
+    echo "invert_binary_mask ${OUTPUTDIR}/exclusion_mask_atlasspace.nii  ${OUTPUTDIR}/exclusion_mask_atlasspace.nii " |tee -a  $LOG
+    invert_binary_mask ${OUTPUTDIR}/exclusion_mask_atlasspace.nii  ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
+    #echo fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -sub 1 ${OUTPUTDIR}/exclusion_mask_atlasspace.nii  2>&1 | tee -a  $LOG
+    #fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -sub 1 ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
+    #echo fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -abs ${OUTPUTDIR}/exclusion_mask_atlasspace.nii 2>&1 | tee -a  $LOG
+    #fslmaths ${OUTPUTDIR}/exclusion_mask_atlasspace.nii -abs ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
+    
     mkdir -p ${OUTPUTDIR}/heatmaps_atlasspace_corrected/
     for file in `ls ${OUTPUTDIR}/heatmaps_atlasspace/*atlasspace.nii.gz`
     do 
         Y=`basename $file`
         Y=`remove_ext $Y`
         Y=${OUTPUTDIR}/heatmaps_atlasspace_corrected/${Y}        
-        echo "fslmaths $file -mas ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${Y}.nii" 2>&1 | tee -a  $LOG
-        fslmaths $file -mas ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${Y}.nii              
+        #echo "fslmaths $file -mas ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${Y}.nii" 2>&1 | tee -a  $LOG
+        #fslmaths $file -mas ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${Y}.nii              
+        echo "ImageMath 3 ${Y}.nii  m $file ${OUTPUTDIR}/exclusion_mask_atlasspace.nii" | tee -a  $LOG
+        ImageMath 3 ${Y}.nii  m $file ${OUTPUTDIR}/exclusion_mask_atlasspace.nii
         
         ${INSTALL_PREFIX}/nii2tiff.sh ${Y}.nii ${Y}.tif float32 yes 2>&1 | tee -a  $LOG
         pigz -vf -p $NUMCPU ${Y}.nii 

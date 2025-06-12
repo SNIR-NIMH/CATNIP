@@ -20,7 +20,7 @@ fi
 
 
 dim=3
-FSLOUTPUTTYPE=NIFTI
+#FSLOUTPUTTYPE=NIFTI
 START=$(date +%s)
 f=$1
 m=$2
@@ -42,8 +42,8 @@ output=`readlink -f $output`
 #cd $dir
 #f=`basename $f`
 # ======================================================================
-#prefix=${output%.*}
-prefix=`remove_ext ${output}`
+prefix=${output%.*}
+#prefix=`remove_ext ${output}` # removing dependence on FSL
 
 if [ x"$numcpu" == "x" ];then
     export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=12
@@ -97,15 +97,18 @@ else
     
 fi    
 
-echo antsApplyTransforms -d $dim -i $m -r $f -o ${output} -n BSpline -t "$prefix"0GenericAffine.mat -f 0 -v ${verbose} --float
-antsApplyTransforms -d $dim -i $m -r $f -o ${output} -n BSpline -t "$prefix"0GenericAffine.mat -f 0 -v ${verbose} --float
+#echo antsApplyTransforms -d $dim -i $m -r $f -o ${output} -n BSpline -t "$prefix"0GenericAffine.mat -f 0 -v ${verbose} --float
+#antsApplyTransforms -d $dim -i $m -r $f -o ${output} -n BSpline -t "$prefix"0GenericAffine.mat -f 0 -v ${verbose} --float
+echo antsApplyTransforms -d $dim -i $m -r $f -o ${output} -n Linear -t "$prefix"0GenericAffine.mat -f 0 -v ${verbose} --float
+antsApplyTransforms -d $dim -i $m -r $f -o ${output} -n Linear -t "$prefix"0GenericAffine.mat -f 0 -v ${verbose} --float
 
-L=${#output}
-ext=${output:L-4:4}
-if [ "$ext" != ".tif" ];then
-    echo fslmaths ${prefix}.nii -thr 0 ${prefix}.nii -odt float
-    fslmaths ${prefix}.nii -thr 0 ${prefix}.nii -odt float
-fi
+# No need for fslmaths since Linear interpolation does not introduce negative values
+#L=${#output}
+#ext=${output:L-4:4}
+#if [ "$ext" != ".tif" ];then
+#    echo fslmaths ${prefix}.nii -thr 0 ${prefix}.nii -odt float
+#    fslmaths ${prefix}.nii -thr 0 ${prefix}.nii -odt float
+#fi
 
 END=$(date +%s)
 DIFF=$(( $END - $START ))
