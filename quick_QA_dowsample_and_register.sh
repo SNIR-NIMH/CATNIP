@@ -7,7 +7,8 @@ INSTALL_PREFIX=`dirname $INSTALL_PREFIX`
 
 if [ $# -lt "6" ];then
     echo "Usage:
-    ./quick_QA_downsample_and_register.sh  INPUTDIR  OUTPUTDIR  DSFACTOR  isOB  NOISE_PARAM  ATLASVERSION  NUMCPU
+    ./quick_QA_downsample_and_register.sh  INPUTDIR  OUTPUTDIR  DSFACTOR  isOB  \ 
+                        NOISE_PARAM  ATLASVERSION  [NUMCPU] [UDFLIP] [LRFLIP]
     
     INPUTDIR        Input directory containing correctly oriented images. They will 
                     not be reoriented further.
@@ -16,8 +17,13 @@ if [ $# -lt "6" ];then
     DSFACTOR        Downsample factor, e.g. 6x6x5.
     isOB            Either yes or no.
     NOISE_PARAM     Noise parameter in percentile,stepsize format, used in CATNIP.
+                    Example 50,1.05.
     ATLASVERSION    Atlas version (e.g. v2 or v3) used in CATNIP script
-    NUMCPU          (Optional) Number of CPUs to use for registration. Default 12.
+    NUMCPU          (Optional) Number of CPUs to use. Default 12.
+    UDFLIP          (Optional) Either yes or no, to flip the image in up/down 
+                    to match the atlas orientation. Default no.
+    LRFLIP          (Optional) Either yes or no, to flip the image in left/right
+                    to match the atlas orientation. Default no.
     "
     exit 1
 fi
@@ -29,11 +35,26 @@ OBFLAG=$4
 NOISE=$5
 ATLASVERSION=$6
 NUMCPU=$7
+UDFLIP=$8
+LRFLIP=$9
 if [ x"$NUMCPU" == "x" ];then
     NUMCPU=12
 fi
+if [ x"$UDFLIP" == "x" ];then
+    UDFLIP=no
+fi
+if [ x"$LRFLIP" == "x" ];then
+    LRFLIP=no
+fi
+    
     
 ID=`basename $INPUTDIR`
+ID="$ID"_`date '+%Y-%m-%d_%H-%M-%S'`
+echo "Unique ID is $ID"
+OUTPUTDIR=${OUTPUTDIR}/${ID}/
+
+
+
 mkdir -p $OUTPUTDIR
 a=`echo $NOISE |cut -d ',' -f1`
 b=`echo $NOISE |cut -d ',' -f2`
@@ -109,7 +130,12 @@ ATLASHEMIMASK=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_hemisphere
 
 IMG=$OUTPUTDIR/${ID}_downsampled_${DSFACTOR}.nii
 IMG2=$OUTPUTDIR/${ID}_downsampled_${DSFACTOR}_denoised.nii
-${INSTALL_PREFIX}/Downsample3D.sh $INPUTDIR $IMG $DSFACTOR $ATLASIMAGE
+if [ "$UDFLIP" != "no" ] || [ "$LRFLIP" != "no" ];then
+    ${INSTALL_PREFIX}/FlipImages.sh $INPUTDIR  $OUTPUTDIR/flipped $UDFLIP $LRFLIP no $NUMCPU
+    ${INSTALL_PREFIX}/Downsample3D.sh $OUTPUTDIR/flipped $IMG $DSFACTOR $ATLASIMAGE
+else
+    ${INSTALL_PREFIX}/Downsample3D.sh $INPUTDIR $IMG $DSFACTOR $ATLASIMAGE
+fi
 
 ${INSTALL_PREFIX}/fix_header.sh $IMG $IMG 25x25x25
 ${INSTALL_PREFIX}/remove_background_noise.sh $IMG $a $IMG2 $b
@@ -124,3 +150,7 @@ echo ${INSTALL_PREFIX}/antsaffine.sh $IMG2 $ATLASIMAGE  $REG no $NUMCPU 4x2x1
 ${INSTALL_PREFIX}/antsaffine.sh $IMG2 $ATLASIMAGE  $REG no $NUMCPU  4x2x1
 antsApplyTransforms -d 3 -i $ATLASHEMIMASK -r $IMG2 -o $OUTPUTDIR/${ID}_hemispheremask_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1  -t $OUTPUTDIR/${ID}_atlasimage_affine_${DSFACTOR}0GenericAffine.mat   
 antsApplyTransforms -d 3 -i $ATLASLABEL -r $IMG2 -o $OUTPUTDIR/${ID}_atlaslabel_affine_${DSFACTOR}.nii -n NearestNeighbor --float -f 0 -v 1  -t $OUTPUTDIR/${ID}_atlasimage_affine_${DSFACTOR}0GenericAffine.mat  
+
+if [ "$UDFLIP" != "no" ] || [ "$LRFLIP" != "no" ];then
+    rm -rf $OUTPUTDIR/flipped 
+fi
