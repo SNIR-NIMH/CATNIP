@@ -26,6 +26,8 @@ CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+   <li><a href="#usage">GUI</a></li>
+   <li><a href="#usage">Windows Version</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
    <li><a href="#publications">Publications</a></li>
@@ -61,15 +63,16 @@ the ABA. Heatmaps of the cell counts are also generated for visualization and st
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <p align="center">
-  <img src="https://github.com/snehashis-roy/CATNIP/blob/master/img/movie2.gif" alt="animated" height="300"/>  
+  <img src="https://github.com/snehashis-roy/CATNIP/blob/master/img/movie2.gif" alt="animated" height="400"/>  
 </p>
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
 CATNIP is currently configured to run on a 64-bit Linux workstation or cluster. It can also
-be run on any Windows workstation via a virtualization software. We have tested CATNIP on Red Hat 
-Enterprise Linux 8.x and Rocky Linux 9.
+be run on any Windows workstation via a virtualization software, e.g. VMWare. We have tested CATNIP on Red Hat 
+Enterprise Linux 8.x and Rocky Linux 9. (Windows WSL version coming soon...)
+
 
 CATNIP is primarily written in MATLAB, while parts (e.g., registration) of the pipeline are
 run via ANTs [[5]](#5) toolbox. Note that it is *not* required to have an active MATLAB license as all
@@ -140,7 +143,7 @@ correct orientation of the input image or an [example image](example_data.txt).
 The main script is ```CATNIP.sh```. An example usage is,
 ```
 ./CATNIP.sh --cfos /home/user/example_data/ --o /home/user/output/ --ob no --lrflip yes --udflip yes \
---thr 1000:1000:5000 --dsfactor 6x6x5 --cellradii 2,3,4 --ncpu 16 --atlasversion v2
+--thr 1000:1000:5000 --dsfactor 6x6x5 --cellradii 2,3,4 --ncpu 16 --atlasversion v2 --cellsizepx 9,900
 ```
 
 If the images have some artifacts coming from shadows, bubbles, or tearing, it is possible to add an
@@ -149,7 +152,7 @@ An example command in that scenario is the following,
 ```
 ./CATNIP.sh --cfos /home/user/example_data/ --o /home/user/output/ --ob no --lrflip yes --udflip yes \
 --thr 1000:1000:5000 --dsfactor 6x6x5 --cellradii 2,3,4 --ncpu 16 --atlasversion v2 \
---exclude_mask example_data_artifact_mask.tif --mask_ovl_ratio 0.33
+--exclude_mask example_data_artifact_mask.tif --mask_ovl_ratio 0.33  --cellsizepx 9,900
 ```
 
 For details of each of the arguments, please refer to the [documentation](CATNIP_documentation.pdf) section 6.
@@ -158,6 +161,19 @@ may need to be changed, e.g., see Fig 4 of the [documentation](CATNIP_documentat
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- GUI -->
+## GUI
+A simple GUI based on Tkinter is provided. Use `python CATNIP.py` to open the GUI,
+<p align="center">
+  <img src="https://github.com/snir-nimh/CATNIP/blob/master/img/gui.png" height="500"/>  
+</p>
+A "Quick QA" option is added to do an affine-only registration to quickly check the
+initial quality of the registration. This takes about 10-15 minutes with 12 CPUs, so can be
+used to estimate good background removal parameters.
+
+<!-- Windows WSL -->
+## Windows Version
+TBA
 
 
 <!-- LICENSE -->
