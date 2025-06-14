@@ -94,6 +94,7 @@ Usage:
                       Example, 10000:1000:15000 means 6 segmentation images will 
                       be generated at thresholds 10000,11000,..,15000.
                       If not mentioned, default is 45000:5000:60000.                                              
+                      Check the FRST images to identify a suitable range of thresholds.
                       
     EXCLUSION_MASK  : (Optional) A binary mask indicating bad regions/artifacts in the image. 
                       ** 1) This must already be in the "atlas orientation".
@@ -188,7 +189,7 @@ if [ "$#" -lt "1" ];then
 fi
 
 
-# Biowulf specific commands, for local machine, comment the following lines
+# Biowulf specific commands, for local machine, comment the following line
 #module load ANTs/2.2.0
 
 
@@ -690,7 +691,9 @@ antsApplyTransforms -d 3 -i ${OUTPUTDIR}/downsampled_${DSFACTOR}_brainmask.nii -
 for file in `ls $OUTPUTDIR/heatmaps_imagespace/*.nii.gz`
 do 
     M=`basename $file`
-    M=`remove_ext $M`
+    #M=`remove_ext $M`
+    M=${M%.*} 
+    M=${M%.*} # remove the nii.gz
     X=${OUTPUTDIR}/heatmaps_atlasspace/${M}_atlasspace.nii    
     
     echo antsApplyTransforms -d 3 -i $file -r  ${ATLASIMAGE} -o $X -n Linear -f 0 -v 1 -t [ ${OUTPUTDIR}/atlasimage_reg1InverseWarp.nii.gz ] -t [ ${OUTPUTDIR}/atlasimage_reg0GenericAffine.mat,1 ] --float 2>&1 | tee -a  $LOG
@@ -762,7 +765,9 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
     for file in `ls ${OUTPUTDIR}/heatmaps_atlasspace/*atlasspace.nii.gz`
     do 
         Y=`basename $file`
-        Y=`remove_ext $Y`
+        Y=${Y%.*}
+        Y=${Y%.*} # remove the .nii.gz
+        #Y=`remove_ext $Y`
         Y=${OUTPUTDIR}/heatmaps_atlasspace_corrected/${Y}        
         #echo "fslmaths $file -mas ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${Y}.nii" 2>&1 | tee -a  $LOG
         #fslmaths $file -mas ${OUTPUTDIR}/exclusion_mask_atlasspace.nii ${Y}.nii              
