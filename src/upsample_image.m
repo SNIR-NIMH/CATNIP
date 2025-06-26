@@ -3,7 +3,8 @@ function upsample_image(input,output,outputsize,interptype,memsafe,compression,o
 % 
 % upsample_image(input,output,outputsize,interptype,memsafe,compression,outputtype)
 % 
-% INPUT          Input image
+% INPUT          Input image, either nifti (nii/nii.gz) or 3D tif (.tif/.tiff) or 
+%                a folder containing 2D tif
 % OUTPUT         Output image, either a 3D tif or a folder. For big images, use a
 %                folder, where multiple 2D slices will be written
 % OUTPUTSIZE     Output image size, in pixels. It must be bigger than input image
@@ -20,7 +21,7 @@ function upsample_image(input,output,outputsize,interptype,memsafe,compression,o
 
 setenv('MATLAB_SHELL','/bin/sh');
 username=getenv('USER');
-temp=strsplit(outputsize,'x');
+temp=strsplit(outputsize,{'x','X'});
 for t=1:3
     odim(t)=str2num(temp{t});
 end
@@ -57,10 +58,31 @@ end
 
 if ischar(input)
     if isfile(input)
-        info=imfinfo(input);
-        idim=[info(1).Height info(1).Width length(info)];
+        [~,~,ext]=fileparts(input);
+        if strcmpi(ext,'.tif') || strcmpi(ext,'.tiff') 
+            info=imfinfo(input);
+            idim=[info(1).Height info(1).Width length(info)];
+        elseif  strcmpi(ext,'.nii') || strcmpi(ext,'.gz') 
+            vol=load_untouch_nii(input);
+            vol=permute(vol.img,[2 1 3]);
+            idim=size(vol);
+            memsafe='false';
+        else
+            fprintf('ERROR: Input must be tif or nifti image.\n');
+            fprintf('ERROR: You entered %s\n',input);
+            return;
+        end
     elseif isfolder(input)
         inputfilelist=rdir(fullfile(input,'*.tif'));
+        if isempty(inputfilelist)
+            inputfilelist=rdir(fullfile(input,'*.tiff'));
+            if isempty(inputfilelist)
+                fprintf('ERROR: Input folder must contain .tif or .tiff files.\n');
+                return;
+            end
+
+        end
+
         info=imfinfo(inputfilelist(1).name);
         idim=[info(1).Height info(1).Width length(inputfilelist)];
     end
@@ -75,8 +97,16 @@ fprintf('Upsampling factor = %.2f x %.2f x %.2f\n',ff(1),ff(2),ff(3));
 if strcmpi(memsafe,'false')
     fprintf('WARNING: Assuming sufficient available memory, input image will be loaded completely from disk.\n');
     if ischar(input)
-        fprintf('Loading %s\n',input);
-        inputvol=load3Dtiff(input,0);
+        [~,~,ext]=fileparts(input);
+        if strcmpi(ext,'.tif') || strcmpi(ext,'.tiff') 
+            inputvol=load3Dtiff(input,0);
+        elseif  strcmpi(ext,'.nii') || strcmpi(ext,'.gz') 
+            inputvol=load_untouch_nii(input);
+            inputvol=permute(inputvol.img,[2 1 3]); % nifti xy is opposite of tif xy
+        end
+            
+%         fprintf('Loading %s\n',input);
+%         inputvol=load3Dtiff(input,0);
     elseif isnumeric(input)
         inputvol=uint16(input);
     end

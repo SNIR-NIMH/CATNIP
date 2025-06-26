@@ -7,7 +7,8 @@ if [ $# -lt "4" ];then
     
 ./upsample_image.sh INPUT OUTPUT OUTPUTSIZE INTERP MEMSAFE COMPRESSION OUTPUTTYPE
  
- INPUT          Input image, either a 3D tif or a folder.
+ INPUT          Input image, either nifti (nii/nii.gz) or 3D tif (.tif/.tiff) or 
+                a folder containing 2D tif
  OUTPUT         Output image, either a 3D tif or a folder. For big images, use a
                 folder, where multiple 2D slices will be written
  OUTPUTSIZE     Output image size, in pixels. It must be bigger than input image
