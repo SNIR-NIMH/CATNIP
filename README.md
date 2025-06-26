@@ -26,8 +26,8 @@ CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-   <li><a href="#usage">GUI</a></li>
-   <li><a href="#usage">Windows Version</a></li>
+   <li><a href="#gui">GUI</a></li>
+   <li><a href="#windows-version">Windows Version</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
    <li><a href="#publications">Publications</a></li>
