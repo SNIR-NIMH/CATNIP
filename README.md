@@ -167,9 +167,11 @@ A simple GUI based on Tkinter is provided. Use `python CATNIP.py` to open the GU
 <p align="center">
   <img src="https://github.com/snir-nimh/CATNIP/blob/master/img/gui.png" height="500"/>  
 </p>
-A "Quick QA" option is added to do an affine-only registration to quickly check the
-initial quality of the registration. This takes about 10-15 minutes with 12 CPUs, so can be
-used to estimate good background removal parameters.
+A "Quick QA" option will do an affine-only registration to quickly check the
+initial quality of the registration. It downsamples the image, removes the
+background, and registers to the chosen atlas using affine only registration. 
+This takes about 10-15 minutes with 12 CPUs, so can be used to estimate good 
+background removal parameters too.
 
 <!-- Windows WSL -->
 ## Windows Version
