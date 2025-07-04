@@ -1,17 +1,18 @@
 #!/bin/bash
 exe_name=$0
 exe_dir=`dirname "$0"`
-if [ $# -lt "3" ]; then
+if [ $# -lt "4" ]; then
   echo "---------------------------------------------------------------------
   Usage:
-  ./run_remove_background_noise.sh INPUT QUANTILE OUTPUT GRADSCALE
+  ./remove_background_noise.sh INPUT QUANTILE OUTPUT GRADSCALE
   All volumes must be either NIFTI or XML
-  INPUT       : An MRI 3D volume, with skull and with background noise
-  QUANTILE    : Percent of histogram to consider for initial quantile.
-                A reasonable value is 20-40. (default 30)
-  OUTPUT      : Final noise removed volume
+  INPUT       : A 3D volume (nifti) with background noise
+  QUANTILE    : Percent of histogram to consider for initial threshold.
+                A reasonable range is 30-50. 
+  OUTPUT      : Final background noise removed volume (nifti, to be written)
   GRADSCALE     A scaling factor to increase threshold at each iteration.
-                Usually 1.2 works well.
+                A reasonable range is 1.02-1.10. 1.05 indicates the initial 
+                threshold is increased by 5% at each iteration until convergence.
   ---------------------------------------------------------------------"
   exit 1
 fi
