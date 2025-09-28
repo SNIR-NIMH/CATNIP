@@ -27,7 +27,7 @@ CATNIP is whole brain <b>C</b>ellular <b>A</b>c<b>T</b>ivity estimation : a <b>N
     </li>
     <li><a href="#usage">Usage</a></li>
    <li><a href="#gui">GUI</a></li>
-   <li><a href="#windows-version">Windows Version</a></li>
+   <li><a href="#windows-version">Windows GUI in WSL</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
    <li><a href="#publications">Publications</a></li>
@@ -174,8 +174,67 @@ This takes about 10-15 minutes with 12 CPUs, so can be used to estimate good
 background removal parameters too.
 
 <!-- Windows WSL -->
-## Windows Version
-TBA
+## Windows GUI
+CATNIP and CATNIP GUI can be run under Windows WSL. 
+1. Install Windows Subsystem for Linux and install Ubuntu (tested on 22.04)
+   ```https://learn.microsoft.com/en-us/windows/wsl/install```
+      
+2. Open a WSL shell (navigate to a folder in Windows Explorer, shift+right click on
+   the blank space, choose Linux shell), and install the following libraries,
+   ```
+   sudo apt-get update
+   sudo apt install -y python3-tk libxt6 gedit pigz git net-tools
+   ```
+   Then close the current shell and open a new one.
+3. cd to appropriate directory (all Windows drives are under /mnt, e.g. /mnt/c/ is C drive),
+   download and install CATNIP
+   ```
+   git clone https://github.com/SNIR-NIMH/CATNIP
+   ```
+   Then follow the installation instructions listed above in <a href="#prerequisites">Prerequisites</a> section,
+   * download and install Matlab Compiler Runtime (MCR) R2022a (v912),
+   * download ANTs (tested on 2.2.0),
+   * change the MCRROOT variable to the installed v912 folder in all the shell scripts,
+   * add ANTs bin folder to PATH variable and add it to .bashrc.
+   
+5. Download and install VcXsrv
+   ```
+   https://github.com/marchaesen/vcxsrv/releases
+   ```
+6. There should be a "XLaunch" icon on Desktop after installation. If not, it should be
+   located in "C:\Program Files\VcXsrv\xlaunch", or wherever VcXsrv is installed.
+   
+7. To open a GUI from the WSL shell, double click Xlaunch, choose "Multiple Windows",
+   next, choose "Start no client", next, check "Disable access control", next, finish.
+   A window will popup briefly and go away. An "X" icon will show up in the bottom right corner, leave it open.
+   
+8. Next, note the IP of the computer, example 192.168.1.100. The IP can also be found using ifconfig.
+  Then run 
+  ```
+export DISPLAY=192.168.1.100:0.0
+```
+assuming the IP is 192.168.1.100. Setting the environment variable DISPLAY allows a GUI to open in the current shell.
+
+8. Open the .bashrc file using gedit (```gedit ~/.bashrc```) and add the above line to set the DISPLAY 
+automatically whenever a new shell is launched.
+
+9. While VcXsrv is running, open a new shell, and test GUI feature by opening CATNIP GUI,
+    ```python CATNIP.py```
+
+### Notes
+1. Number of CPUs in CATNIP can not exceed the number of cores (not number of Logical processes) shown in Task Manager.
+2. In WSL, one drawback is that the network drives are not present by default, so the input and output must be on any of the local drives.
+   All Windows drives are automatically mounted in WSL inside /mnt/. So D: drive is mounted in /mnt/d, etc. It is possible to mount network
+   drives within WSL.
+   * Mount the network drive in Windows as usual, e.g. Z:
+   * Open a WSL shell, and run
+   ```
+   sudo mkdir /mnt/z
+   sudo mount -t drvfs Z: /mnt/z
+   ```
+
+   
+   
 
 
 <!-- LICENSE -->
