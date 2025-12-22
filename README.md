@@ -71,7 +71,8 @@ the ABA. Heatmaps of the cell counts are also generated for visualization and st
 
 CATNIP is currently configured to run on a 64-bit Linux workstation or cluster. It can also
 be run on any Windows workstation via a virtualization software, e.g. VMWare. We have tested CATNIP on Red Hat 
-Enterprise Linux 8.x and Rocky Linux 9. (Windows WSL version coming soon...)
+Enterprise Linux 8.x and Rocky Linux 9. See  <a href="#windows-gui">Windows WSL</a> section
+to install in Windows via WSL.
 
 
 CATNIP is primarily written in MATLAB, while parts (e.g., registration) of the pipeline are
@@ -258,9 +259,17 @@ Snehashis Roy - email@snehashis.roy@nih.gov
 ## Publications
 <a id="1">[1]</a> 
 D. Bakalar, O. Gavrilova, S. Z. Jiang, H.‐Y. Zhang, S. Roy, S. K. Williams, N. Liu, S. Wisser, T. B. Usdin, L. E. Eiden (2023). 
-Constitutive and conditional PACAP deletion reveals distinct phenotypes driven by developmental versus neurotransmitter actions of PACAP.
+"Constitutive and conditional PACAP deletion reveals distinct phenotypes driven by developmental versus neurotransmitter actions of PACAP".
 Journal of Neuroendocrinology,  35(11):e13286. ([Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC10620107/))
 
+Complete Data Download [Link](https://dandiarchive.org/dandiset/001362?pos=1)
+
+<a id="1">[2]</a> 
+R. O. Goral, S. Roy, C. A. Co, R. N. Wine, P. W. Lamb, P. M. Turner, S. J. McBride, T. B. Usdin, J. L. Yakel (2025). 
+"Mesoscopic analysis of GABAergic marker expression in acetylcholine neurons in the whole mouse brain".
+iScience (in Press). ([Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC12466781/)) 
+
+* Complete Data Download [Link](https://doi.brainimagelibrary.org/doi/10.35077/g.1188)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
