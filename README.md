@@ -262,7 +262,7 @@ D. Bakalar, O. Gavrilova, S. Z. Jiang, H.‐Y. Zhang, S. Roy, S. K. Williams, N.
 "Constitutive and conditional PACAP deletion reveals distinct phenotypes driven by developmental versus neurotransmitter actions of PACAP".
 Journal of Neuroendocrinology,  35(11):e13286. ([Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC10620107/))
 
-Complete Data Download [Link](https://dandiarchive.org/dandiset/001362?pos=1)
+* Complete Data Download [Link](https://dandiarchive.org/dandiset/001362?pos=1)
 
 <a id="1">[2]</a> 
 R. O. Goral, S. Roy, C. A. Co, R. N. Wine, P. W. Lamb, P. M. Turner, S. J. McBride, T. B. Usdin, J. L. Yakel (2025). 
