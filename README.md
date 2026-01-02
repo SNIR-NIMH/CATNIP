@@ -267,7 +267,7 @@ Journal of Neuroendocrinology,  35(11):e13286. ([Link](https://pmc.ncbi.nlm.nih.
 <a id="1">[2]</a> 
 R. O. Goral, S. Roy, C. A. Co, R. N. Wine, P. W. Lamb, P. M. Turner, S. J. McBride, T. B. Usdin, J. L. Yakel (2025). 
 "Mesoscopic analysis of GABAergic marker expression in acetylcholine neurons in the whole mouse brain".
-iScience (in Press). ([Link](https://pmc.ncbi.nlm.nih.gov/articles/PMC12466781/)) 
+iScience (in Press). ([Link](https://www.sciencedirect.com/science/article/pii/S2589004225027920)) 
 
 * Complete Data Download [Link](https://doi.brainimagelibrary.org/doi/10.35077/g.1188)
 
