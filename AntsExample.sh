@@ -66,10 +66,10 @@ if [[ $mysetting == "fastfortesting" ]] ; then
   percentage=0.3
   syn="100x5x1,0.0001,4"
 elif   [[ $mysetting == "forproduction" ]] ; then
-  its=1000x1000x1000
-#  its=10000x111110x11110
+  its=500x250x100
+  syn="70x50x30,1e-6,10"
   percentage=0.3
-  syn="100x100x50,0.00001,5"
+
 elif [[ $mysetting == "fast" ]] ; then
    its=100x50x25
   percentage=0.35
