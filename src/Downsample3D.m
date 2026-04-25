@@ -79,26 +79,29 @@ else
     return;
 end
 fprintf('Input image size = %d x %d x %d \n', dim(1),dim(2),dim(3));
-   
+ 
 
-try
-%     Move to v2 of the parse_ome_tiff_xml code, the Imspector software has
-%     been upgraded
-    resx=parse_ome_tiff_xml_v2(xmlfile,'dx','v2')/1000;
-    resy=parse_ome_tiff_xml_v2(xmlfile,'dy','v2')/1000;
-    resz=parse_ome_tiff_xml_v2(xmlfile,'dz','v2')/1000;
-%     resx=parse_ome_tiff_xml(xmlfile,'dx')/1000;
-%     resy=parse_ome_tiff_xml(xmlfile,'dy')/1000;
-%     resz=parse_ome_tiff_xml(xmlfile,'dz')/1000;
-catch e
-    fprintf('WARNING: XML header isn''t found in the first tif image : %s\n',xmlfile);
-    fprintf('WARNING: Assuming 3.77x3.77x5.0 um resolution.\n');
-    fprintf('WARNING: If the resolutions are incorrect, then the registration to atlas may be incorrect.\n');
-    fprintf('%s\n',e.message);
-    resx=3.77;
-    resy=3.77;
-    resz=5;
-end
+% Default res if a template isn't provided
+resx=3.77;
+resy=3.77;
+resz=5;
+
+% try
+% %     Move to v2 of the parse_ome_tiff_xml code, the Imspector software has
+% %     been upgraded
+%     resx=parse_ome_tiff_xml_v2(xmlfile,'dx','v2')/1000;
+%     resy=parse_ome_tiff_xml_v2(xmlfile,'dy','v2')/1000;
+%     resz=parse_ome_tiff_xml_v2(xmlfile,'dz','v2')/1000;
+% %     resx=parse_ome_tiff_xml(xmlfile,'dx')/1000;
+% %     resy=parse_ome_tiff_xml(xmlfile,'dy')/1000;
+% %     resz=parse_ome_tiff_xml(xmlfile,'dz')/1000;
+% catch e
+%     fprintf('WARNING: XML header isn''t found in the first tif image : %s\n',xmlfile);
+%     fprintf('WARNING: Assuming 3.77x3.77x5.0 um resolution.\n');
+%     fprintf('WARNING: If the resolutions are incorrect, then the registration to atlas may be incorrect.\n');
+%     fprintf('%s\n',e.message);
+%     
+% end
 
 odim=zeros(1,3);
 odim(1)=length([1:dx:dim(1)]);
