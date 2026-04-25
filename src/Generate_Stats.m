@@ -62,8 +62,13 @@ for j=1:L
     LID(j)=labelinfo{j,1};
     LName{j}=strrep(labelinfo{j,2},' ','_');
     LName{j}=strrep(LName{j},',','');
-    LAcronym{j}=strrep(labelinfo{j,3},' ','_');
-    LAcronym{j}=strrep(LAcronym{j},',','');
+    if size(labelinfo,2)==3
+        LAcronym{j}=strrep(labelinfo{j,3},' ','_');
+        LAcronym{j}=strrep(LAcronym{j},',','');
+    else
+        LAcronym{j}=strrep(labelinfo{j,2},' ','_');
+        LAcronym{j}=strrep(LAcronym{j},',','');
+    end
     
 end
 
