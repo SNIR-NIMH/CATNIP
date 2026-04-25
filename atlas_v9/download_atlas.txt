@@ -1,0 +1,5 @@
+Download the modified atlas (see README) from here,
+
+http://hpc.nih.gov/~NIMH_MHSNIR/WHS_atlas_modified.zip
+
+Unzip the 4 files in atlas_v9 folder
