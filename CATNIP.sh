@@ -132,6 +132,9 @@ Usage:
                       v6: v5 atlas but excludes brainstem and cerebellum
                       v7: v5 atlas but in coronal orientation, OB front and 
                           cerebellum back in depth.
+                      v9: Waxholm Space rat brain atlas excluding labels 41,45,76 
+                          (optic nerve, spinal cord, spinal trigeminal tract)
+                          
                       
     MASK_OVL_RATIO    (Optional) A mask overlap ratio between 0 and 1. It is used only
                       when an EXCLUSION_MASK is mentioned. A ratio of 0.5 means a label
@@ -206,7 +209,7 @@ check_modules ImageMath
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -l "cfos:,ncpu:,o:,ob:,udflip:,lrflip:,thr:,ometiff:,dsfactor:,cellradii:,exclude_mask:,atlasversion:,bg_noise_param:,mask_ovl_ratio:,cellsizepx:,slow,help" -o "h" -- "$@")
+options=$(getopt -l "cfos:,ncpu:,o:,ob:,udflip:,lrflip:,thr:,dsfactor:,cellradii:,exclude_mask:,atlasversion:,bg_noise_param:,mask_ovl_ratio:,cellsizepx:,slow,help" -o "h" -- "$@")
 
 CHANNEL640=
 OUTPUTDIR=
@@ -215,7 +218,7 @@ OBFLAG=
 UDFLIPFLAG=
 LRFLIPFLAG=
 THRESHOLD=
-OMETIFF=
+#OMETIFF=
 EXCLUDE_MASK=
 DSFACTOR=
 CELLRADII=
@@ -312,7 +315,7 @@ done
 
 OUTPUTDIR=`readlink -f $OUTPUTDIR`
 
-OMETIFF=${CHANNEL640} # Legacy from previous pipeline, probably not needed any more
+#OMETIFF=${CHANNEL640} # Legacy from previous pipeline, probably not needed any more
 
 
 if [ x"${CHANNEL640}" == "x" ];then
@@ -377,8 +380,8 @@ fi
 
 if  [ "${ATLASVERSION}" != "v1" ] && [ "${ATLASVERSION}" != "v2" ] && [ "${ATLASVERSION}" != "v3" ] && \
  [ "${ATLASVERSION}" != "v4" ] && [ "${ATLASVERSION}" != "v5" ] && [ "${ATLASVERSION}" != "v6" ]  && \
-  [ "${ATLASVERSION}" != "v7" ] && [ "${ATLASVERSION}" != "v8" ];then
-    echo "ERROR: ATLASVERSION flag (--atlasversion XX) must be v1,v2,..,v8. You entered $ATLASVERSION"
+  [ "${ATLASVERSION}" != "v7" ] && [ "${ATLASVERSION}" != "v8" ] && [ "${ATLASVERSION}" != "v9" ] ;then
+    echo "ERROR: ATLASVERSION flag (--atlasversion XX) must be v1,v2,..,v9. You entered $ATLASVERSION"
     exit 1            
 fi
 
@@ -495,6 +498,15 @@ elif [ "$ATLASVERSION" == "v7" ];then  # v7 atlas is the wholebrain version of c
         ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/ABA_25um_annotation_axial_noOB.nii.gz
     fi
     WHOLEBRAIN=true
+elif [ "$ATLASVERSION" == "v9" ];then  # v9 is Waxholm Rat atlas (preprocessed), see Readme in atlas_v9 for preprocessing steps
+    if [ "$OBFLAG" == "yes" ];then    
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/WHS_SD_rat_T2star_v1.01_masked.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/WHS_SD_rat_atlas_v4_removedlabels.nii.gz
+    else    
+        ATLASIMAGE=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/WHS_SD_rat_T2star_v1.01_masked.nii.gz
+        ATLASLABEL=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/WHS_SD_rat_atlas_v4_removedlabels.nii.gz
+    fi
+    WHOLEBRAIN=true
 fi
 ATLASHEMIMASK=${INSTALL_PREFIX}/atlas_${ATLASVERSION}/uClear_Template_hemispheremask.nii.gz
     
@@ -551,7 +563,7 @@ fi
 echo "================ Downsample FOS channel for N4 correction =================" 2>&1 | tee -a $LOG 
 
 # Downsample by DSFACTOR
-${INSTALL_PREFIX}/Downsample3D.sh ${CHANNEL640} $OUTPUTDIR/downsampled_${DSFACTOR}.nii $DSFACTOR $ATLASIMAGE ${OMETIFF} 2>&1 | tee -a  $LOG
+${INSTALL_PREFIX}/Downsample3D.sh ${CHANNEL640} $OUTPUTDIR/downsampled_${DSFACTOR}.nii $DSFACTOR $ATLASIMAGE 2>&1 | tee -a  $LOG
 ${INSTALL_PREFIX}/fix_header.sh $OUTPUTDIR/downsampled_${DSFACTOR}.nii  $OUTPUTDIR/downsampled_${DSFACTOR}.nii  25x25x25 2>&1 | tee -a  $LOG # Fix header, for the time being, hardcoded
 cp -vf $OUTPUTDIR/downsampled_${DSFACTOR}.nii $OUTPUTDIR/downsampled_${DSFACTOR}_orig.nii 2>&1 | tee -a  $LOG
 ${INSTALL_PREFIX}/remove_background_noise.sh  $OUTPUTDIR/downsampled_${DSFACTOR}.nii ${BG_NOISE_INIT} $OUTPUTDIR/downsampled_${DSFACTOR}.nii ${BG_NOISE_SLOPE}  2>&1 | tee  -a $LOG
@@ -576,7 +588,7 @@ export CHANNEL640=${OUTPUTDIR}/N4/
 
 echo "================ Downsample bias corrected 640 image =================" 2>&1 | tee -a $LOG 
 # Downsample to approximately 25um resolution, for debugging purpose
-${INSTALL_PREFIX}/Downsample3D.sh ${CHANNEL640} $OUTPUTDIR/downsampled_${DSFACTOR}.nii ${DSFACTOR} $ATLASIMAGE ${OMETIFF} 2>&1 | tee -a  $LOG
+${INSTALL_PREFIX}/Downsample3D.sh ${CHANNEL640} $OUTPUTDIR/downsampled_${DSFACTOR}.nii ${DSFACTOR} $ATLASIMAGE 2>&1 | tee -a  $LOG
 echo "====================================================================" 2>&1 | tee -a $LOG 
 ${INSTALL_PREFIX}/fix_header.sh $OUTPUTDIR/downsampled_${DSFACTOR}.nii  $OUTPUTDIR/downsampled_${DSFACTOR}.nii  25x25x25  2>&1 | tee -a  $LOG # Fix header, for the time being, hardcoded
 
@@ -584,11 +596,11 @@ echo "================ Atlas registration with ANTs =================" 2>&1 | te
 ${INSTALL_PREFIX}/image_clamp.sh $OUTPUTDIR/downsampled_${DSFACTOR}.nii  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii 99 true 2>&1 | tee -a  $LOG
 ANTS_RANDOM_SEED=1234
 if [ "${REPRODUCIBLE}" == "false" ];then
-    echo ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
-    ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
+    echo ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE forproduction $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
+    ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE forproduction $OUTPUTDIR/atlasimage_reg.nii $NUMCPU   4x2x1  2>&1 | tee  -a $LOG
 else
-    echo ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii 1   4x2x1  2>&1 | tee  -a $LOG
-    ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE fast $OUTPUTDIR/atlasimage_reg.nii 1   4x2x1  2>&1 | tee  -a $LOG
+    echo ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE forproduction $OUTPUTDIR/atlasimage_reg.nii 1   4x2x1  2>&1 | tee  -a $LOG
+    ${INSTALL_PREFIX}/AntsExample.sh  $OUTPUTDIR/downsampled_${DSFACTOR}_brain.nii $ATLASIMAGE forproduction $OUTPUTDIR/atlasimage_reg.nii 1   4x2x1  2>&1 | tee  -a $LOG
 fi
 
 echo "================== Transforming labels =========================" 2>&1 | tee -a $LOG 
@@ -731,7 +743,7 @@ if [ x"${EXCLUDE_MASK}" != "x" ];then
     echo "=============== Correcting CSV files and heatmaps with the exclusion mask ==============" 2>&1 | tee -a $LOG 
     mkdir -p ${OUTPUTDIR}/FRST_seg_corrected/
     if [ "${IMGSPACE}" == "original" ];then
-        ${INSTALL_PREFIX}/Downsample3D.sh ${EXCLUDE_MASK} ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${DSFACTOR} $ATLASIMAGE ${OMETIFF} 2>&1 | tee -a  $LOG
+        ${INSTALL_PREFIX}/Downsample3D.sh ${EXCLUDE_MASK} ${OUTPUTDIR}/exclusion_mask_downsampled_${DSFACTOR}.nii ${DSFACTOR} $ATLASIMAGE  2>&1 | tee -a  $LOG
     else
         echo ConvertImage 3 ${EXCLUDE_MASK} $OUTPUTDIR/exclusion_mask_downsampled_${DSFACTOR}.nii 1 2>&1 | tee -a  $LOG
         ConvertImage 3 ${EXCLUDE_MASK} $OUTPUTDIR/exclusion_mask_downsampled_${DSFACTOR}.nii 1 
