@@ -52,6 +52,13 @@ elseif nargin==7
 end
 if isfolder(input)
     A=rdir(fullfile(input,'*.tif'));
+    if isempty(A)
+        A=rdir(fullfile(input,'*.tiff'));
+        if isempty(A)
+            fprintf('ERROR: Input folder does not contain .tif or .tiff images.\n');
+            return;
+        end
+    end
     x=imfinfo(A(1).name);
     dim=[x.Height x.Width length(A)];
     input_is_file=0;
