@@ -6,7 +6,7 @@ $0 fixed.nii moving.nii mysetting registeredvolume.nii numcpu dsfactor
 
 fixed.nii               Fixed image
 moving.nii              Moving image
-mysetting               Either forproduction (slowest), fast, or fastfortesting(fastest)
+mysetting               Either forproduction (slowest), fast (ok), or fastfortesting(fastest)
 registeredvolume.nii    Registered output image
 numcpu                  (Optional) number of cpus to use, default 12
 dsfactor                Shrinking factor for each of the 3 levels of registrations,
@@ -16,14 +16,8 @@ NB: fixed/moving/registered volume MUST be nii files
 nii.gz is NOT ACCEPTABLE
 
 To transform another image (such as label) using this transform :
-
-1) First, run the following command to make sure the label image
-   headers are same as that of moving image
-   cp /home/user/labelimage.nii ./otherimage.nii
-   fslcpgeom moving.nii otherimage.nii
-(Copy because fslcpgeom overwrites files)
-2) Then use antsApplyTransforms  to transform the label image,
-antsApplyTransforms -d 3 -i otherimage.nii -r fixed.nii -o otherimage_reg.nii -n BSpline/NearestNeighbor -f 0 -v 1 
+use antsApplyTransforms  to transform the label image,
+antsApplyTransforms -d 3 -i labelimage.nii -r fixed.nii -o labelimage_def.nii -n NearestNeighbor -f 0 -v 1 
   -t registeredVolume1Warp.nii.gz -t registeredVolume0GenericAffine.mat
    
 ========================================================================="
