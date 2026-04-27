@@ -67,7 +67,7 @@ else
     exit 1
 fi 
 
-its=100x50x25
+its=500x250x100
 percentage=0.35
 #shrinkfactor=18x12x6
 #shrinkfactor=4x2x1
